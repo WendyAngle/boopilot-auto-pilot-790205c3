@@ -1184,7 +1184,7 @@ export function UseTemplateDialog({ template, task, open, onOpenChange, onViewDe
                                     </div>
                                     {draft.scheduledMode === "active" && (
                                       <p className="ml-6 text-[11px] text-muted-foreground">
-                                        系统将在每个账号下一个活跃时间窗口开始执行
+                                        系统将在每个账号下一个活跃时间窗口开始执行，系统会根据账号国家地区自动转化为当地相应时段
                                       </p>
                                     )}
                                   </div>
@@ -1209,7 +1209,7 @@ export function UseTemplateDialog({ template, task, open, onOpenChange, onViewDe
                                             className="h-7 w-24 text-xs"
                                           />
                                         </div>
-                                        <p className="text-[11px] text-muted-foreground">任务将在指定时间开始执行</p>
+                                        <p className="text-[11px] text-muted-foreground">任务将在指定时间开始执行（北京时间）</p>
                                       </div>
                                     )}
                                   </div>
@@ -1250,7 +1250,7 @@ export function UseTemplateDialog({ template, task, open, onOpenChange, onViewDe
                             onChange={(e) => update("recurStartTime", e.target.value)}
                             className="h-7 w-24 text-xs"
                           />
-                          <span className="text-[11px] text-muted-foreground">任务开始执行时间</span>
+                          <span className="text-[11px] text-muted-foreground">任务开始执行时间（北京时间）</span>
                         </div>
                         <div className="flex flex-wrap items-center gap-2">
                           <span className="w-16 text-muted-foreground">执行周期</span>
@@ -1399,7 +1399,7 @@ export function UseTemplateDialog({ template, task, open, onOpenChange, onViewDe
                                       </div>
                                       {draft.scheduledMode === "active" && (
                                         <p className="ml-6 text-[11px] text-muted-foreground">
-                                          系统将在每个账号下一个活跃时间窗口开始执行
+                                          系统将在每个账号下一个活跃时间窗口开始执行，系统会根据账号国家地区自动转化为当地相应时段
                                         </p>
                                       )}
                                     </div>
@@ -1424,7 +1424,7 @@ export function UseTemplateDialog({ template, task, open, onOpenChange, onViewDe
                                               className="h-7 w-24 text-xs"
                                             />
                                           </div>
-                                          <p className="text-[11px] text-muted-foreground">任务将在指定时间开始执行</p>
+                                          <p className="text-[11px] text-muted-foreground">任务将在指定时间开始执行（北京时间）</p>
                                         </div>
                                       )}
                                     </div>
@@ -1465,7 +1465,7 @@ export function UseTemplateDialog({ template, task, open, onOpenChange, onViewDe
                               onChange={(e) => update("recurStartTime", e.target.value)}
                               className="h-7 w-24 text-xs"
                             />
-                            <span className="text-[11px] text-muted-foreground">任务开始执行时间</span>
+                            <span className="text-[11px] text-muted-foreground">任务开始执行时间（北京时间）</span>
                           </div>
                           <div className="flex flex-wrap items-center gap-2">
                             <span className="w-16 text-muted-foreground">发布频次</span>
