@@ -59,15 +59,15 @@ export function InterestPreferenceDialog({
   const makeGroup = (seed = false): PrefGroup => ({
     id: `pg_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
     interestKeywords: seed ? "travel；food；parenting" : "",
-    search: true,
+    search: seed,
     keywords: seed ? "travel" : "",
-    like: true,
+    like: seed,
     likeMin: 0,
     likeMax: 15,
-    follow: true,
+    follow: seed,
     followMin: 0,
     followMax: 15,
-    comment: true,
+    comment: seed,
     commentMin: 0,
     commentMax: 15,
     sentiment: "",
@@ -248,9 +248,17 @@ export function InterestPreferenceDialog({
                 </div>
                 <Input
                   value={g.interestKeywords}
-                  onChange={(e) =>
-                    setGroup(idx, { interestKeywords: e.target.value })
-                  }
+                  onChange={(e) => {
+                    const v = e.target.value;
+                    const hasValue = v.trim().length > 0;
+                    setGroup(idx, {
+                      interestKeywords: v,
+                      search: hasValue,
+                      like: hasValue,
+                      follow: hasValue,
+                      comment: hasValue,
+                    });
+                  }}
                   placeholder="推荐 3-5 个，以「；」分隔，推荐英文，如：travel；food；parenting"
                   className="ml-9 h-8 w-[calc(100%-2.25rem)] text-xs"
                 />
