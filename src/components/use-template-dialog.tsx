@@ -112,20 +112,20 @@ function makeNurtureGroup(): NurtureGroup {
   return {
     id: `ng_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
     nurtureInterestKeywords: "",
-    nurtureLike: true,
+    nurtureLike: false,
     nurtureLikeMin: 0,
     nurtureLikeMax: 15,
-    nurtureFollow: true,
+    nurtureFollow: false,
     nurtureFollowMin: 0,
     nurtureFollowMax: 15,
-    nurtureComment: true,
+    nurtureComment: false,
     nurtureCommentMin: 0,
     nurtureCommentMax: 15,
     nurtureCommentEmoji: false,
     nurtureCommentTopic: "",
     nurtureCommentSentiment: "",
     nurtureCommentStyle: "",
-    nurtureSearch: true,
+    nurtureSearch: false,
     nurtureKeywordOn: true,
     nurtureKeywords: "",
   };
@@ -1005,7 +1005,17 @@ export function UseTemplateDialog({ template, task, open, onOpenChange, onViewDe
                             </div>
                             <Input
                               value={g.nurtureInterestKeywords}
-                              onChange={(e) => setGroup(idx, { nurtureInterestKeywords: e.target.value })}
+                              onChange={(e) => {
+                                const v = e.target.value;
+                                const hasValue = v.trim().length > 0;
+                                setGroup(idx, {
+                                  nurtureInterestKeywords: v,
+                                  nurtureSearch: hasValue,
+                                  nurtureLike: hasValue,
+                                  nurtureFollow: hasValue,
+                                  nurtureComment: hasValue,
+                                });
+                              }}
                               placeholder="推荐 3-5 个，以「；」分隔，推荐英文，如：travel；food；parenting"
                               className="ml-9 h-8 w-[calc(100%-2.25rem)] text-xs"
                             />
