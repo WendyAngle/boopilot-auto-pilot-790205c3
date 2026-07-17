@@ -1465,7 +1465,7 @@ export function UseTemplateDialog({ template, task, open, onOpenChange, onViewDe
                               onChange={(e) => update("recurStartTime", e.target.value)}
                               className="h-7 w-24 text-xs"
                             />
-                            <span className="text-[11px] text-muted-foreground">任务开始执行时间</span>
+                            <span className="text-[11px] text-muted-foreground">任务开始执行时间（北京时间）</span>
                           </div>
                           <div className="flex flex-wrap items-center gap-2">
                             <span className="w-16 text-muted-foreground">发布频次</span>
