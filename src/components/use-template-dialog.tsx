@@ -1399,7 +1399,7 @@ export function UseTemplateDialog({ template, task, open, onOpenChange, onViewDe
                                       </div>
                                       {draft.scheduledMode === "active" && (
                                         <p className="ml-6 text-[11px] text-muted-foreground">
-                                          系统将在每个账号下一个活跃时间窗口开始执行
+                                          系统将在每个账号下一个活跃时间窗口开始执行，系统会根据账号国家地区自动转化为当地相应时段
                                         </p>
                                       )}
                                     </div>
