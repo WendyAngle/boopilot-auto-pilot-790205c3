@@ -1005,7 +1005,17 @@ export function UseTemplateDialog({ template, task, open, onOpenChange, onViewDe
                             </div>
                             <Input
                               value={g.nurtureInterestKeywords}
-                              onChange={(e) => setGroup(idx, { nurtureInterestKeywords: e.target.value })}
+                              onChange={(e) => {
+                                const v = e.target.value;
+                                const hasValue = v.trim().length > 0;
+                                setGroup(idx, {
+                                  nurtureInterestKeywords: v,
+                                  nurtureSearch: hasValue,
+                                  nurtureLike: hasValue,
+                                  nurtureFollow: hasValue,
+                                  nurtureComment: hasValue,
+                                });
+                              }}
                               placeholder="推荐 3-5 个，以「；」分隔，推荐英文，如：travel；food；parenting"
                               className="ml-9 h-8 w-[calc(100%-2.25rem)] text-xs"
                             />
