@@ -248,9 +248,17 @@ export function InterestPreferenceDialog({
                 </div>
                 <Input
                   value={g.interestKeywords}
-                  onChange={(e) =>
-                    setGroup(idx, { interestKeywords: e.target.value })
-                  }
+                  onChange={(e) => {
+                    const v = e.target.value;
+                    const hasValue = v.trim().length > 0;
+                    setGroup(idx, {
+                      interestKeywords: v,
+                      search: hasValue,
+                      like: hasValue,
+                      follow: hasValue,
+                      comment: hasValue,
+                    });
+                  }}
                   placeholder="推荐 3-5 个，以「；」分隔，推荐英文，如：travel；food；parenting"
                   className="ml-9 h-8 w-[calc(100%-2.25rem)] text-xs"
                 />
