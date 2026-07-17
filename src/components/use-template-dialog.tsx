@@ -1424,7 +1424,7 @@ export function UseTemplateDialog({ template, task, open, onOpenChange, onViewDe
                                               className="h-7 w-24 text-xs"
                                             />
                                           </div>
-                                          <p className="text-[11px] text-muted-foreground">任务将在指定时间开始执行</p>
+                                          <p className="text-[11px] text-muted-foreground">任务将在指定时间开始执行（北京时间）</p>
                                         </div>
                                       )}
                                     </div>
