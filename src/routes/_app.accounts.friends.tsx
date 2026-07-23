@@ -73,6 +73,15 @@ export const Route = createFileRoute("/_app/accounts/friends")({
   component: FriendsPage,
 });
 
+type TabKey = FriendStatus | "watchlist";
+
+function daysSince(dt: string): number {
+  // "YYYY-MM-DD HH:mm"
+  const t = new Date(dt.replace(" ", "T") + ":00").getTime();
+  if (Number.isNaN(t)) return 0;
+  return Math.max(0, Math.floor((Date.now() - t) / 86400000));
+}
+
 function FriendsPage() {
   const { accounts, requests: initial } = useMemo(() => getFriendData(), []);
   const [requests, setRequests] = useState<FriendRequest[]>(initial);
