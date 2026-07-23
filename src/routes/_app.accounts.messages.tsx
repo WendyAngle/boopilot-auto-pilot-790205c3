@@ -243,6 +243,7 @@ function MessagesPage() {
                 accountName={activeAccount.username}
                 accountPlatform={activeAccount.platform}
                 onSend={handleSend}
+                onPatch={(msgId, patch) => patchMessage(activeConv.id, msgId, patch)}
               />
             ) : (
               <div className="flex flex-1 flex-col items-center justify-center gap-3 text-sm text-muted-foreground">
