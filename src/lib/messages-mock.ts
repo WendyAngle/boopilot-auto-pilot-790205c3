@@ -307,37 +307,138 @@ export function platformMeta(p: Platform) {
   return PLATFORM_META[p];
 }
 
-// ---- 假装翻译（zh <-> peerLang），只做展示用 ----
-const ZH_TO_LANG_SAMPLES: Record<MsgLang, (zh: string) => string> = {
-  en: (zh) => `[EN] ${zh}`,
-  ja: (zh) => `[JA] ${zh}`,
-  id: (zh) => `[ID] ${zh}`,
-  ms: (zh) => `[MS] ${zh}`,
-  th: (zh) => `[TH] ${zh}`,
+// ---- 假装翻译（zh -> peerLang），mock 用途，尽量让译文"看起来像"目标语言 ----
+const PHRASE_DICT: Record<string, Partial<Record<MsgLang, string>>> = {
+  "好的，稍后为您处理。": {
+    en: "Sure, I'll take care of it shortly.",
+    ja: "承知しました、のちほど対応いたします。",
+    id: "Baik, akan segera saya proses.",
+    ms: "Baik, saya akan uruskan sebentar lagi.",
+    th: "รับทราบค่ะ เดี๋ยวจัดการให้นะคะ",
+  },
+  "好的，稍后为您处理，请稍候片刻～": {
+    en: "Got it, I'll handle it for you shortly — please hold on for a moment.",
+    ja: "承知しました。少々お待ちくださいませ、すぐに対応いたします。",
+    id: "Baik, akan segera saya proses—mohon tunggu sebentar ya.",
+    ms: "Baik, saya akan uruskan sebentar lagi—harap tunggu sekejap ya.",
+    th: "รับทราบค่ะ กำลังดำเนินการให้อยู่ รบกวนรอสักครู่นะคะ",
+  },
+  "感谢您的关注！": {
+    en: "Thanks for reaching out!",
+    ja: "お問い合わせありがとうございます！",
+    id: "Terima kasih sudah menghubungi!",
+    ms: "Terima kasih kerana menghubungi kami!",
+    th: "ขอบคุณที่ติดต่อเรานะคะ",
+  },
+  "感谢您的耐心等待，正在为您核实中。": {
+    en: "Thanks for your patience — we're checking the details for you right now.",
+    ja: "お待たせして申し訳ございません、ただいま確認しております。",
+    id: "Terima kasih atas kesabarannya, sedang kami periksa ya.",
+    ms: "Terima kasih atas kesabaran anda, kami sedang menyemaknya.",
+    th: "ขอบคุณที่รอสักครู่นะคะ กำลังตรวจสอบให้อยู่ค่ะ",
+  },
+  "您好，M/L/XL 均有现货，稍后为您发一份完整尺码表。": {
+    en: "Hi! M / L / XL are all in stock. I'll send over the full size chart shortly.",
+    ja: "こんにちは！M・L・XL いずれも在庫がございます。のちほどサイズ表をお送りします。",
+    id: "Halo! Ukuran M / L / XL semua tersedia, akan saya kirimkan panduan ukuran lengkapnya.",
+    ms: "Hai! Saiz M / L / XL semuanya ada stok, saya akan hantar carta saiz penuh sebentar lagi.",
+    th: "สวัสดีค่ะ ไซซ์ M / L / XL มีของครบเลยค่ะ เดี๋ยวส่งตารางไซซ์ให้นะคะ",
+  },
+  "好的，尺码表已在准备中，1 分钟内发给您～": {
+    en: "Sure — the size chart is on its way, I'll send it within a minute.",
+    ja: "承知しました。サイズ表を準備中で、1 分以内にお送りします。",
+    id: "Baik, panduan ukuran sedang saya siapkan, dalam 1 menit akan saya kirim ya.",
+    ms: "Baik, carta saiz sedang disiapkan, dalam masa 1 minit saya akan hantar.",
+    th: "รับทราบค่ะ กำลังจัดตารางไซซ์ให้ ภายใน 1 นาทีจะส่งให้นะคะ",
+  },
+  "请问您平时的身高体重方便告诉我们吗？我们可以更精准推荐尺码。": {
+    en: "Would you mind sharing your usual height and weight? That will help us recommend the right size.",
+    ja: "普段の身長と体重を教えていただけますか？より正確なサイズをご提案いたします。",
+    id: "Boleh info tinggi dan berat badan Anda? Biar kami bantu rekomendasikan ukurannya lebih pas.",
+    ms: "Boleh kongsikan tinggi dan berat biasa? Supaya kami boleh syorkan saiz yang lebih tepat.",
+    th: "รบกวนแจ้งส่วนสูงและน้ำหนักได้ไหมคะ จะได้แนะนำไซซ์ได้แม่นยำขึ้นค่ะ",
+  },
+  "已帮您查询，包裹预计明天送达，请注意查收。": {
+    en: "I've checked for you — the parcel should arrive tomorrow. Please keep an eye out.",
+    ja: "確認いたしました。お荷物は明日到着予定です。お受け取りをお願いいたします。",
+    id: "Sudah saya cek, paketnya diperkirakan sampai besok, mohon ditunggu ya.",
+    ms: "Saya sudah semak, bungkusan dijangka tiba esok. Sila pantau penghantaran ya.",
+    th: "ตรวจสอบให้แล้วนะคะ พัสดุน่าจะถึงพรุ่งนี้ รบกวนรอรับด้วยค่ะ",
+  },
+  "订单已在派送中，稍后我把物流单号发给您。": {
+    en: "Your order is out for delivery — I'll share the tracking number shortly.",
+    ja: "ご注文は現在配送中です。追跡番号はのちほどお送りします。",
+    id: "Pesanan sedang dalam pengiriman, nomor resi akan saya kirim menyusul.",
+    ms: "Pesanan sedang dalam penghantaran, nombor penjejakan akan saya hantar sebentar lagi.",
+    th: "ออเดอร์กำลังจัดส่งค่ะ เดี๋ยวส่งเลขพัสดุให้อีกทีนะคะ",
+  },
+  "非常抱歉给您带来困扰，我们已优先加急处理。": {
+    en: "So sorry for the trouble — we've prioritised your case and are handling it urgently.",
+    ja: "ご迷惑をおかけし大変申し訳ございません。優先的に対応させていただいております。",
+    id: "Mohon maaf atas ketidaknyamanannya, kami sudah tangani sebagai prioritas.",
+    ms: "Maaf atas kesulitan yang dialami, kami sudah utamakan dan uruskan segera.",
+    th: "ขออภัยในความไม่สะดวกค่ะ เราเร่งดำเนินการให้เป็นกรณีเร่งด่วนแล้วนะคะ",
+  },
+  "感谢您的关注！方便留下邮箱吗？我把合作简介发给您。": {
+    en: "Thanks for reaching out! Could you share your email? I'll send over our collaboration brief.",
+    ja: "ご興味をお持ちいただきありがとうございます！メールアドレスを教えていただけますか？資料をお送りいたします。",
+    id: "Terima kasih atas ketertarikannya! Boleh minta email-nya? Saya kirimkan proposal kerjasamanya.",
+    ms: "Terima kasih atas minat anda! Boleh kongsi emel? Saya akan hantarkan ringkasan kerjasama.",
+    th: "ขอบคุณที่สนใจนะคะ ขออีเมลได้ไหมคะ จะส่งข้อมูลความร่วมมือให้ค่ะ",
+  },
+  "很高兴收到您的邀请，我们的商务同事会在 24 小时内联系您。": {
+    en: "Great to hear from you — our BD team will get in touch within 24 hours.",
+    ja: "お声掛けいただき光栄です。ビジネス担当より 24 時間以内にご連絡いたします。",
+    id: "Senang menerima undangan Anda, tim BD kami akan menghubungi dalam 24 jam.",
+    ms: "Gembira menerima jemputan anda, pasukan BD kami akan menghubungi dalam 24 jam.",
+    th: "ยินดีมากค่ะ ทีม BD ของเราจะติดต่อกลับภายใน 24 ชั่วโมงนะคะ",
+  },
+  "可以先介绍下品牌与合作形式吗？我们内部快速评估一下。": {
+    en: "Could you share more about your brand and the collaboration format? We'll evaluate it internally.",
+    ja: "貴ブランドと希望する協業形態を簡単に教えていただけますか？社内で速やかに検討いたします。",
+    id: "Boleh info singkat tentang brand dan bentuk kerjasamanya? Kami akan review secara internal.",
+    ms: "Boleh kongsikan sedikit tentang jenama dan bentuk kerjasama? Kami akan nilai secara dalaman.",
+    th: "รบกวนเล่ารายละเอียดแบรนด์และรูปแบบความร่วมมือได้ไหมคะ เราจะประเมินภายในให้เร็วที่สุด",
+  },
+  "您好，感谢您的关注！请问有什么可以帮到您？": {
+    en: "Hi there, thanks for reaching out! How can I help?",
+    ja: "こんにちは、お問い合わせありがとうございます！何かお手伝いできることはございますか？",
+    id: "Halo, terima kasih sudah menghubungi! Ada yang bisa saya bantu?",
+    ms: "Hai, terima kasih kerana menghubungi kami! Ada yang boleh saya bantu?",
+    th: "สวัสดีค่ะ ขอบคุณที่ติดต่อมานะคะ มีอะไรให้ช่วยเหลือไหมคะ",
+  },
+  "收到，稍后为您详细回复～": {
+    en: "Got it — I'll get back to you with the details shortly.",
+    ja: "承知しました、のちほど詳しくご返信いたします。",
+    id: "Baik, akan saya balas lebih detail sebentar lagi.",
+    ms: "Baik, saya akan balas dengan lebih terperinci sebentar lagi.",
+    th: "รับทราบค่ะ เดี๋ยวตอบกลับแบบละเอียดให้อีกทีนะคะ",
+  },
+  "好的，我这边核实一下再回复您，请稍等。": {
+    en: "Sure, let me verify on my side and get back to you — please hold on.",
+    ja: "承知しました。こちらで確認のうえご返信いたしますので、少々お待ちください。",
+    id: "Baik, saya cek dulu di sisi kami lalu segera balas, mohon tunggu ya.",
+    ms: "Baik, biar saya semak dahulu dan akan balas kemudian. Sila tunggu sebentar.",
+    th: "รับทราบค่ะ ขอเช็คทางเราก่อนแล้วจะตอบกลับ รบกวนรอสักครู่นะคะ",
+  },
+};
+
+/** 未匹配到词条时使用的兜底：至少让输出看起来像目标语言的一句话 */
+const FALLBACK_TEMPLATE: Record<MsgLang, (zh: string) => string> = {
+  en: (zh) => `(Auto-translated) Reply to your message: ${zh}`,
+  ja: (zh) => `（自動翻訳）ご返信いたします：${zh}`,
+  id: (zh) => `(Terjemahan otomatis) Balasan untuk pesan Anda: ${zh}`,
+  ms: (zh) => `(Terjemahan automatik) Balasan untuk mesej anda: ${zh}`,
+  th: (zh) => `(แปลอัตโนมัติ) ตอบกลับข้อความของคุณ: ${zh}`,
   zh: (zh) => zh,
 };
 
 export function translateZhTo(lang: MsgLang, zh: string): string {
-  if (!zh.trim()) return "";
-  // 常用短句给一份更像样的示例翻译
-  const dict: Record<string, Partial<Record<MsgLang, string>>> = {
-    "好的，稍后为您处理。": {
-      en: "Sure, I'll take care of it shortly.",
-      ja: "承知しました、のちほど対応いたします。",
-      id: "Baik, akan segera saya proses.",
-      ms: "Baik, saya akan uruskan sebentar lagi.",
-      th: "รับทราบค่ะ เดี๋ยวจัดการให้นะคะ",
-    },
-    "感谢您的关注！": {
-      en: "Thanks for reaching out!",
-      ja: "お問い合わせありがとうございます！",
-      id: "Terima kasih sudah menghubungi!",
-      ms: "Terima kasih kerana menghubungi kami!",
-      th: "ขอบคุณที่ติดต่อเรานะคะ",
-    },
-  };
-  const hit = dict[zh.trim()]?.[lang];
-  return hit ?? ZH_TO_LANG_SAMPLES[lang](zh);
+  const trimmed = zh.trim();
+  if (!trimmed) return "";
+  if (lang === "zh") return trimmed;
+  const hit = PHRASE_DICT[trimmed]?.[lang];
+  return hit ?? FALLBACK_TEMPLATE[lang](trimmed);
 }
 
 // AI 回复候选生成（根据最近一条对方消息）
