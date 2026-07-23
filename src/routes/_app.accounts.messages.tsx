@@ -176,7 +176,7 @@ function MessagesPage() {
           </div>
         </div>
 
-        <div className="grid h-[calc(100vh-13rem)] grid-cols-[220px_380px_1fr] gap-3 rounded-xl border bg-card shadow-[var(--shadow-card)]">
+        <div className="grid h-[calc(100vh-13rem)] grid-cols-[220px_360px_1fr] gap-3 rounded-xl border bg-card shadow-[var(--shadow-card)]">
           {/* Column 1: Accounts */}
           <div className="flex min-h-0 flex-col border-r">
             <div className="border-b px-3 py-2.5 text-sm font-medium">账号</div>
@@ -419,12 +419,11 @@ function ConversationItem({
       <div className="min-w-0 flex-1">
         <div className="flex items-center justify-between gap-2">
           <div className="flex min-w-0 items-center gap-1">
-            <span className="truncate text-sm font-medium">{conv.peerName}</span>
+            <span className="truncate text-sm font-medium" title={conv.peerName}>{conv.peerName}</span>
           </div>
           <div className="flex shrink-0 items-center gap-1">
-            <span className="whitespace-nowrap text-right text-[10px] leading-tight text-muted-foreground" title={conv.updatedAt}>
-              <span className="block">{conv.updatedAt.slice(0, 10)}</span>
-              <span className="block">{conv.updatedAt.slice(11, 16)}</span>
+            <span className="whitespace-nowrap text-[10px] text-muted-foreground" title={conv.updatedAt}>
+              {conv.updatedAt.slice(0, 16)}
             </span>
             <button
               type="button"
@@ -448,7 +447,7 @@ function ConversationItem({
           </div>
         </div>
         <div className="flex items-center gap-1.5">
-          <p className="min-w-0 flex-1 truncate text-xs text-muted-foreground">
+          <p className="min-w-0 flex-1 truncate text-xs text-muted-foreground" title={`${last.direction === "out" ? "我: " : ""}${preview}`}>
             {last.direction === "out" ? "我: " : ""}
             {preview}
           </p>
