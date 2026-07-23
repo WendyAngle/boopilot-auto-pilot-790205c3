@@ -417,12 +417,10 @@ function ConversationItem({
     >
       <img src={conv.peerAvatar} alt="" className="h-9 w-9 shrink-0 rounded-full bg-muted" />
       <div className="min-w-0 flex-1">
-        <div className="flex items-center justify-between gap-2">
-          <div className="flex min-w-0 items-center gap-1">
-            <span className="truncate text-sm font-medium" title={conv.peerName}>{conv.peerName}</span>
-          </div>
+        <div className="flex items-start justify-between gap-2">
+          <span className="min-w-0 flex-1 truncate text-sm font-medium" title={conv.peerName}>{conv.peerName}</span>
           <div className="flex shrink-0 items-center gap-1">
-            <span className="whitespace-nowrap text-[10px] text-muted-foreground" title={conv.updatedAt}>
+            <span className="whitespace-nowrap tabular-nums text-[10px] leading-5 text-muted-foreground" title={conv.updatedAt}>
               {conv.updatedAt.slice(0, 16)}
             </span>
             <button
@@ -433,7 +431,7 @@ function ConversationItem({
               }}
               aria-label={conv.starred ? "取消标星" : "加入标星"}
               className={cn(
-                "flex h-5 w-5 items-center justify-center rounded transition-colors",
+                "flex h-5 w-5 shrink-0 items-center justify-center rounded transition-colors",
                 conv.starred
                   ? "text-amber-500"
                   : "text-muted-foreground/40 opacity-0 hover:text-amber-500 group-hover:opacity-100",
