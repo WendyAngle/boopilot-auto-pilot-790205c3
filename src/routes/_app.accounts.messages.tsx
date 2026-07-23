@@ -226,13 +226,41 @@ function MessagesPage() {
                     暂无账号
                   </div>
                 )}
+                {/* 全部标星（跨账号聚合视图） */}
+                {accounts.length > 0 && (
+                  <>
+                    <div className="my-1 border-t" />
+                    <button
+                      onClick={() => setActiveAccountId(GLOBAL_STARRED_ID)}
+                      className={cn(
+                        "flex w-full items-center gap-2 rounded-lg px-2 py-2 text-left text-sm transition-colors",
+                        isGlobalStarred ? "bg-accent" : "hover:bg-accent/50",
+                      )}
+                    >
+                      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-amber-100 text-amber-600 dark:bg-amber-950/40 dark:text-amber-300">
+                        <Star className="h-4 w-4" fill="currentColor" />
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <div className="truncate text-sm font-medium">全部标星</div>
+                        <div className="truncate text-xs text-muted-foreground">
+                          跨账号聚合
+                        </div>
+                      </div>
+                      {starredCount > 0 && (
+                        <Badge className="h-5 min-w-[20px] justify-center rounded-full bg-amber-500/90 px-1.5 text-[10px] text-white hover:bg-amber-500/90">
+                          {starredCount}
+                        </Badge>
+                      )}
+                    </button>
+                  </>
+                )}
               </div>
             </ScrollArea>
           </div>
 
           {/* Column 2: Conversations */}
           <div className="flex min-h-0 flex-col border-r">
-            <div className="border-b p-2.5">
+            <div className="border-b p-2.5 space-y-2">
               <div className="relative">
                 <Search className="absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
                 <Input
@@ -242,21 +270,62 @@ function MessagesPage() {
                   className="h-8 pl-8 text-sm"
                 />
               </div>
+              {isGlobalStarred ? (
+                <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                  <Star className="h-3 w-3 text-amber-500" fill="currentColor" />
+                  全部标星会话（{accountConvs.length}）
+                </div>
+              ) : (
+                <div className="flex items-center justify-between text-xs">
+                  <span className="text-muted-foreground">
+                    {accountConvs.length} 个会话
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => setStarredOnly((v) => !v)}
+                    className={cn(
+                      "flex items-center gap-1 rounded-full border px-2 py-0.5 transition-colors",
+                      starredOnly
+                        ? "border-amber-300 bg-amber-50 text-amber-700 dark:border-amber-800 dark:bg-amber-950/40 dark:text-amber-300"
+                        : "border-transparent text-muted-foreground hover:bg-accent",
+                    )}
+                  >
+                    <Star
+                      className="h-3 w-3"
+                      fill={starredOnly ? "currentColor" : "none"}
+                    />
+                    仅看标星
+                  </button>
+                </div>
+              )}
             </div>
             <ScrollArea className="flex-1">
               <div className="p-1.5">
-                {accountConvs.map((c) => (
-                  <ConversationItem
-                    key={c.id}
-                    conv={c}
-                    active={c.id === activeConvId}
-                    onClick={() => setActiveConvId(c.id)}
-                  />
-                ))}
+                {accountConvs.map((c) => {
+                  const acc = accounts.find((a) => a.id === c.accountId);
+                  return (
+                    <ConversationItem
+                      key={c.id}
+                      conv={c}
+                      active={c.id === activeConvId}
+                      onClick={() => setActiveConvId(c.id)}
+                      onToggleStar={() => toggleStar(c.id)}
+                      accountLabel={
+                        isGlobalStarred && acc
+                          ? `${acc.username} · ${acc.platform}`
+                          : undefined
+                      }
+                    />
+                  );
+                })}
                 {accountConvs.length === 0 && (
                   <div className="flex flex-col items-center gap-2 px-2 py-10 text-center text-xs text-muted-foreground">
                     <MessageSquare className="h-6 w-6 opacity-50" />
-                    暂无私信会话
+                    {isGlobalStarred
+                      ? "暂无标星会话，点击会话卡片右上角的星标可加入"
+                      : starredOnly
+                        ? "该账号下暂无标星会话"
+                        : "暂无私信会话"}
                   </div>
                 )}
               </div>
