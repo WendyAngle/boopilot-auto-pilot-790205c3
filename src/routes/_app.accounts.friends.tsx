@@ -437,53 +437,78 @@ function FriendsPage() {
           </div>
           <ScrollArea className="flex-1">
             <div className="space-y-1 p-2">
-              {listItems.map((r) => (
-                <button
-                  key={r.id}
-                  onClick={() => setActiveId(r.id)}
-                  className={cn(
-                    "flex w-full items-start gap-2 rounded-md border p-2 text-left transition-colors",
-                    r.id === activeId
-                      ? "border-primary bg-accent"
-                      : "border-transparent hover:bg-accent/50",
-                  )}
-                >
-                  <img
-                    src={r.peerAvatar}
-                    alt={r.peerName}
-                    className="h-9 w-9 shrink-0 rounded-full border object-cover"
-                  />
-                  <div className="min-w-0 flex-1">
-                    <div className="flex items-center justify-between gap-2">
-                      <div className="truncate text-sm font-medium">
-                        {r.peerName}
+              {listItems.map((r) => {
+                const urgency = tab === "watchlist" ? urgencyOf(r) : null;
+                const days =
+                  tab === "watchlist"
+                    ? daysSince(r.decidedAt ?? r.requestedAt)
+                    : 0;
+                return (
+                  <button
+                    key={r.id}
+                    onClick={() => setActiveId(r.id)}
+                    className={cn(
+                      "flex w-full items-start gap-2 rounded-md border p-2 text-left transition-colors",
+                      r.id === activeId
+                        ? "border-primary bg-accent"
+                        : "border-transparent hover:bg-accent/50",
+                    )}
+                  >
+                    <img
+                      src={r.peerAvatar}
+                      alt={r.peerName}
+                      className="h-9 w-9 shrink-0 rounded-full border object-cover"
+                    />
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center justify-between gap-2">
+                        <div className="flex min-w-0 items-center gap-1.5">
+                          <div className="truncate text-sm font-medium">
+                            {r.peerName}
+                          </div>
+                          {urgency && <UrgencyBadge urgency={urgency} />}
+                        </div>
+                        <div className="shrink-0 text-[10px] text-muted-foreground">
+                          {r.decidedAt ?? r.requestedAt}
+                        </div>
                       </div>
-                      <div className="shrink-0 text-[10px] text-muted-foreground">
-                        {r.decidedAt ?? r.requestedAt}
+                      <div className="truncate text-xs text-muted-foreground">
+                        {r.peerHandle}
+                      </div>
+                      <div className="mt-1 flex flex-wrap items-center gap-1">
+                        {tab === "watchlist" ? (
+                          <span className="text-[10px] text-muted-foreground">
+                            拒绝已 {days} 天
+                          </span>
+                        ) : (
+                          <>
+                            <Badge
+                              variant="outline"
+                              className="h-4 px-1 text-[10px] font-normal"
+                            >
+                              {SOURCE_LABEL[r.source]}
+                            </Badge>
+                            {r.mutualFriends > 0 && (
+                              <span className="text-[10px] text-muted-foreground">
+                                共同好友 {r.mutualFriends}
+                              </span>
+                            )}
+                          </>
+                        )}
                       </div>
                     </div>
-                    <div className="truncate text-xs text-muted-foreground">
-                      {r.peerHandle}
-                    </div>
-                    <div className="mt-1 flex flex-wrap items-center gap-1">
-                      <Badge
-                        variant="outline"
-                        className="h-4 px-1 text-[10px] font-normal"
-                      >
-                        {SOURCE_LABEL[r.source]}
-                      </Badge>
-                      {r.mutualFriends > 0 && (
-                        <span className="text-[10px] text-muted-foreground">
-                          共同好友 {r.mutualFriends}
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                </button>
-              ))}
+                  </button>
+                );
+              })}
               {listItems.length === 0 && (
                 <div className="px-3 py-12 text-center text-xs text-muted-foreground">
-                  暂无{tab === "pending" ? "待处理申请" : tab === "accepted" ? "好友" : "已拒绝记录"}
+                  暂无
+                  {tab === "pending"
+                    ? "待处理申请"
+                    : tab === "accepted"
+                      ? "好友"
+                      : tab === "rejected"
+                        ? "已拒绝记录"
+                        : "持续关注对象"}
                 </div>
               )}
             </div>
