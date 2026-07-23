@@ -160,16 +160,26 @@ function FriendsPage() {
     setApproveOpen(false);
   };
 
-  const reject = (note: string) => {
+  const reject = (publicReasonZh: string, note: string) => {
     if (!active) return;
+    const publicReasonText = publicReasonZh.trim()
+      ? active.peerLang === "zh"
+        ? publicReasonZh.trim()
+        : translateZhTo(active.peerLang, publicReasonZh.trim())
+      : undefined;
     patch(active.id, {
       status: "rejected",
       decidedAt: now(),
+      publicReasonZh: publicReasonZh.trim() || undefined,
+      publicReasonText,
       note: note.trim() || undefined,
     });
-    toast.success("已拒绝好友申请");
+    toast.success(
+      publicReasonText ? "已拒绝，说明已发送给对方" : "已拒绝好友申请",
+    );
     setRejectOpen(false);
   };
+
 
   const restore = () => {
     if (!active) return;
@@ -457,9 +467,27 @@ function FriendsPage() {
                     </>
                   )}
 
-                  {/* 已拒绝：拒绝时间 */}
-                  {active.status === "rejected" && active.decidedAt && (
-                    <MetaLine label="拒绝时间" value={active.decidedAt} />
+                  {/* 已拒绝：拒绝时间 + 对外说明 */}
+                  {active.status === "rejected" && (
+                    <>
+                      {active.decidedAt && (
+                        <MetaLine label="拒绝时间" value={active.decidedAt} />
+                      )}
+                      {active.publicReasonZh && (
+                        <div className="rounded-md border p-3">
+                          <div className="mb-1.5 text-[11px] font-medium text-muted-foreground">
+                            拒绝时对外发送的说明
+                          </div>
+                          <div className="text-sm">{active.publicReasonZh}</div>
+                          {active.publicReasonText &&
+                            active.publicReasonText !== active.publicReasonZh && (
+                              <div className="mt-1 text-xs text-muted-foreground">
+                                → {active.publicReasonText}
+                              </div>
+                            )}
+                        </div>
+                      )}
+                    </>
                   )}
 
                   {/* 内部备注 */}
@@ -557,6 +585,7 @@ function FriendsPage() {
           <RejectDialog
             open={rejectOpen}
             onOpenChange={setRejectOpen}
+            request={active}
             onConfirm={reject}
           />
           <NoteEditDialog
@@ -737,16 +766,32 @@ function ApproveDialog({
 function RejectDialog({
   open,
   onOpenChange,
+  request,
   onConfirm,
 }: {
   open: boolean;
   onOpenChange: (v: boolean) => void;
-  onConfirm: (note: string) => void;
+  request: FriendRequest;
+  onConfirm: (publicReasonZh: string, note: string) => void;
 }) {
+  const PRESETS = [
+    "感谢你的关注！近期不便新增好友，欢迎继续互动交流。",
+    "抱歉，账号目前仅接受工作相关联系，感谢理解。",
+    "你好，暂不方便添加为好友，如有商务合作可通过私信联系。",
+  ];
+  const [publicReasonZh, setPublicReasonZh] = useState("");
   const [note, setNote] = useState("");
   useEffect(() => {
-    if (open) setNote("");
+    if (open) {
+      setPublicReasonZh("");
+      setNote("");
+    }
   }, [open]);
+
+  const preview =
+    publicReasonZh.trim() && request.peerLang !== "zh"
+      ? translateZhTo(request.peerLang, publicReasonZh.trim())
+      : "";
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -757,24 +802,59 @@ function RejectDialog({
             拒绝好友申请
           </DialogTitle>
           <DialogDescription>
-            拒绝不会通知对方。可填写内部备注，方便日后回溯。
+            拒绝后可选择性地发送对外说明；若留空则不通知对方，仅在平台内记录。
           </DialogDescription>
         </DialogHeader>
-        <div className="space-y-1.5">
-          <Label className="text-xs">内部备注 / 拒绝原因（选填）</Label>
-          <Textarea
-            value={note}
-            onChange={(e) => setNote(e.target.value)}
-            placeholder="例如：疑似营销账号，暂不通过"
-            rows={3}
-            className="text-sm"
-          />
+        <div className="space-y-3">
+          <div className="space-y-1.5">
+            <div className="flex items-center justify-between">
+              <Label className="text-xs">对外说明（中文，自动翻译发送给对方，选填）</Label>
+            </div>
+            <Textarea
+              value={publicReasonZh}
+              onChange={(e) => setPublicReasonZh(e.target.value)}
+              placeholder="留空则不通知对方；填写后将以对方语言礼貌发送"
+              rows={2}
+              className="text-sm"
+            />
+            <div className="flex flex-wrap gap-1">
+              {PRESETS.map((p) => (
+                <button
+                  key={p}
+                  type="button"
+                  onClick={() => setPublicReasonZh(p)}
+                  className="rounded-full border bg-muted/40 px-2 py-0.5 text-[11px] text-muted-foreground hover:bg-accent"
+                >
+                  {p.length > 14 ? p.slice(0, 14) + "…" : p}
+                </button>
+              ))}
+            </div>
+            {preview && (
+              <div className="rounded-md border border-dashed bg-muted/30 px-2 py-1.5 text-xs text-muted-foreground">
+                <span className="mr-1">→ {LANG_LABEL[request.peerLang]}：</span>
+                {preview}
+              </div>
+            )}
+          </div>
+          <div className="space-y-1.5">
+            <Label className="text-xs">内部备注（仅自己可见，选填）</Label>
+            <Textarea
+              value={note}
+              onChange={(e) => setNote(e.target.value)}
+              placeholder="例如：疑似营销账号，暂不通过"
+              rows={2}
+              className="text-sm"
+            />
+          </div>
         </div>
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)}>
             取消
           </Button>
-          <Button variant="destructive" onClick={() => onConfirm(note)}>
+          <Button
+            variant="destructive"
+            onClick={() => onConfirm(publicReasonZh, note)}
+          >
             确认拒绝
           </Button>
         </DialogFooter>
