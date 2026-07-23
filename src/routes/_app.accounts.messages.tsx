@@ -109,6 +109,16 @@ function MessagesPage() {
     );
   };
 
+  const patchMessage = (convId: string, msgId: string, patch: Partial<DirectMessage>) => {
+    setConversations((prev) =>
+      prev.map((c) =>
+        c.id === convId
+          ? { ...c, messages: c.messages.map((m) => (m.id === msgId ? { ...m, ...patch } : m)) }
+          : c,
+      ),
+    );
+  };
+
   const totalUnread = useMemo(
     () => conversations.reduce((s, c) => s + c.unread, 0),
     [conversations],
