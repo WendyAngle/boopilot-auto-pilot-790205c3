@@ -625,6 +625,26 @@ function ChatWindow({
         </Tooltip>
       </div>
 
+      {/* 失败提醒条 */}
+      {failedMessages.length > 0 && (
+        <div className="flex items-center gap-2 border-b border-destructive/30 bg-destructive/10 px-4 py-2 text-xs text-destructive">
+          <AlertCircle className="h-3.5 w-3.5 shrink-0" />
+          <span className="flex-1">
+            当前会话有 <span className="font-semibold">{failedMessages.length}</span> 条消息未送达，请及时处理。
+          </span>
+          <Button
+            size="sm"
+            variant="outline"
+            className="h-6 border-destructive/40 px-2 text-[11px] text-destructive hover:bg-destructive/10 hover:text-destructive"
+            onClick={handleRetryAll}
+          >
+            <RotateCw className="mr-1 h-3 w-3" />
+            全部重试
+          </Button>
+        </div>
+      )}
+
+
       {/* Messages */}
       <ScrollArea className="flex-1">
         <div ref={scrollRef} className="space-y-4 px-4 py-4">
