@@ -862,14 +862,6 @@ function RejectDialog({
   );
 }
 
-            确认拒绝
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
-  );
-}
-
 function NoteEditDialog({
   open,
   onOpenChange,
