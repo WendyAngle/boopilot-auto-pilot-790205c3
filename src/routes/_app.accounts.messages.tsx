@@ -437,7 +437,7 @@ function ChatWindow({
       <ScrollArea className="flex-1">
         <div ref={scrollRef} className="space-y-4 px-4 py-4">
           {conv.messages.map((m) => (
-            <MessageBubble key={m.id} msg={m} peerName={conv.peerName} />
+            <MessageBubble key={m.id} msg={m} peerName={conv.peerName} onRetry={handleRetry} />
           ))}
         </div>
       </ScrollArea>
