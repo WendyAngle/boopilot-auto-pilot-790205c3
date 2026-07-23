@@ -14,6 +14,8 @@ import {
   Info,
   Bell,
   BellRing,
+  Clock,
+  AlertCircle,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -71,11 +73,20 @@ export const Route = createFileRoute("/_app/accounts/friends")({
   component: FriendsPage,
 });
 
+type TabKey = FriendStatus | "watchlist";
+
+function daysSince(dt: string): number {
+  // "YYYY-MM-DD HH:mm"
+  const t = new Date(dt.replace(" ", "T") + ":00").getTime();
+  if (Number.isNaN(t)) return 0;
+  return Math.max(0, Math.floor((Date.now() - t) / 86400000));
+}
+
 function FriendsPage() {
   const { accounts, requests: initial } = useMemo(() => getFriendData(), []);
   const [requests, setRequests] = useState<FriendRequest[]>(initial);
   const [activeAccountId, setActiveAccountId] = useState(accounts[0]?.id ?? "");
-  const [tab, setTab] = useState<FriendStatus>("pending");
+  const [tab, setTab] = useState<TabKey>("pending");
   const [activeId, setActiveId] = useState<string>("");
   const [keyword, setKeyword] = useState("");
 
@@ -90,28 +101,90 @@ function FriendsPage() {
     return map;
   }, [requests]);
 
+  // 「再次申请」映射：key = accountId::peerHandle
+  // 只有当同一账号下，该 peer 既有 pending 又有 rejected+watchlisted 时才算「再次申请」
+  const reappMap = useMemo(() => {
+    const pendingKeys = new Set(
+      requests
+        .filter((r) => r.status === "pending")
+        .map((r) => `${r.accountId}::${r.peerHandle}`),
+    );
+    const map = new Map<string, FriendRequest>(); // key -> pending 申请
+    requests.forEach((r) => {
+      const k = `${r.accountId}::${r.peerHandle}`;
+      if (r.status === "pending" && pendingKeys.has(k)) {
+        map.set(k, r);
+      }
+    });
+    // 仅保留同时存在 watchlisted rejected 的
+    const result = new Map<string, FriendRequest>();
+    requests.forEach((r) => {
+      if (r.status === "rejected" && r.watchlisted) {
+        const k = `${r.accountId}::${r.peerHandle}`;
+        const p = map.get(k);
+        if (p) result.set(k, p);
+      }
+    });
+    return result;
+  }, [requests]);
+
+  // 全局再次申请数量（用于顶部横幅）
+  const reappGlobal = reappMap.size;
+
   const countsForActive = useMemo(() => {
-    const c = { pending: 0, accepted: 0, rejected: 0 };
+    const c = { pending: 0, accepted: 0, rejected: 0, watchlist: 0 };
     requests
       .filter((r) => r.accountId === activeAccountId)
       .forEach((r) => {
         c[r.status]++;
+        if (r.status === "rejected" && r.watchlisted) c.watchlist++;
       });
     return c;
   }, [requests, activeAccountId]);
 
+  // 计算某条 rejected+watchlisted 的紧迫度
+  const urgencyOf = (r: FriendRequest): "reapplied" | "overdue" | "watching" => {
+    const k = `${r.accountId}::${r.peerHandle}`;
+    if (reappMap.has(k)) return "reapplied";
+    const days = daysSince(r.decidedAt ?? r.requestedAt);
+    if (days > 30) return "overdue";
+    return "watching";
+  };
+
   const listItems = useMemo(() => {
     const kw = keyword.trim().toLowerCase();
+    const matchKw = (r: FriendRequest) =>
+      kw
+        ? r.peerName.toLowerCase().includes(kw) ||
+          r.peerHandle.toLowerCase().includes(kw) ||
+          (r.requestText ?? "").toLowerCase().includes(kw)
+        : true;
+    if (tab === "watchlist") {
+      const order: Record<"reapplied" | "overdue" | "watching", number> = {
+        reapplied: 0,
+        overdue: 1,
+        watching: 2,
+      };
+      return requests
+        .filter(
+          (r) =>
+            r.accountId === activeAccountId &&
+            r.status === "rejected" &&
+            r.watchlisted,
+        )
+        .filter(matchKw)
+        .sort((a, b) => {
+          const ua = urgencyOf(a);
+          const ub = urgencyOf(b);
+          if (ua !== ub) return order[ua] - order[ub];
+          return (b.decidedAt ?? "").localeCompare(a.decidedAt ?? "");
+        });
+    }
     return requests
       .filter((r) => r.accountId === activeAccountId && r.status === tab)
-      .filter((r) =>
-        kw
-          ? r.peerName.toLowerCase().includes(kw) ||
-            r.peerHandle.toLowerCase().includes(kw) ||
-            (r.requestText ?? "").toLowerCase().includes(kw)
-          : true,
-      );
-  }, [requests, activeAccountId, tab, keyword]);
+      .filter(matchKw);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [requests, activeAccountId, tab, keyword, reappMap]);
 
   useEffect(() => {
     if (!listItems.length) {
@@ -217,6 +290,16 @@ function FriendsPage() {
     setRemoveOpen(false);
   };
 
+  const jumpToFirstReapplication = () => {
+    const first = Array.from(reappMap.values())[0];
+    if (!first) return;
+    if (first.accountId !== activeAccountId) {
+      setActiveAccountId(first.accountId);
+    }
+    setTab("pending");
+    setActiveId(first.id);
+  };
+
   return (
     <div className="flex h-[calc(100vh-8rem)] flex-col gap-3">
       <div>
@@ -225,6 +308,20 @@ function FriendsPage() {
           统一查看各账号收到的加好友请求，通过或拒绝后附加备注/欢迎语，已通过的好友进入「好友列表」。
         </p>
       </div>
+
+      {reappGlobal > 0 && (
+        <div className="flex items-center justify-between gap-3 rounded-lg border border-primary/30 bg-primary/5 px-3 py-2 text-sm">
+          <div className="flex items-center gap-2">
+            <BellRing className="h-4 w-4 text-primary" />
+            <span>
+              有 <span className="font-semibold text-primary">{reappGlobal}</span> 位「持续关注」对象再次发来好友申请
+            </span>
+          </div>
+          <Button size="sm" variant="outline" onClick={jumpToFirstReapplication}>
+            立即查看
+          </Button>
+        </div>
+      )}
 
       <div className="grid flex-1 min-h-0 grid-cols-[240px_320px_1fr] gap-3">
         {/* 左：账号列表 */}
@@ -293,8 +390,8 @@ function FriendsPage() {
         {/* 中：分类与列表 */}
         <div className="flex min-h-0 flex-col rounded-lg border bg-card">
           <div className="border-b p-2">
-            <Tabs value={tab} onValueChange={(v) => setTab(v as FriendStatus)}>
-              <TabsList className="grid w-full grid-cols-3">
+            <Tabs value={tab} onValueChange={(v) => setTab(v as TabKey)}>
+              <TabsList className="grid w-full grid-cols-4">
                 <TabsTrigger value="pending" className="gap-1.5">
                   待处理
                   {countsForActive.pending > 0 && (
@@ -318,6 +415,14 @@ function FriendsPage() {
                     {countsForActive.rejected}
                   </span>
                 </TabsTrigger>
+                <TabsTrigger value="watchlist" className="gap-1.5">
+                  持续关注
+                  {countsForActive.watchlist > 0 && (
+                    <span className="text-[10px] text-muted-foreground">
+                      {countsForActive.watchlist}
+                    </span>
+                  )}
+                </TabsTrigger>
               </TabsList>
             </Tabs>
             <div className="relative mt-2">
@@ -332,53 +437,78 @@ function FriendsPage() {
           </div>
           <ScrollArea className="flex-1">
             <div className="space-y-1 p-2">
-              {listItems.map((r) => (
-                <button
-                  key={r.id}
-                  onClick={() => setActiveId(r.id)}
-                  className={cn(
-                    "flex w-full items-start gap-2 rounded-md border p-2 text-left transition-colors",
-                    r.id === activeId
-                      ? "border-primary bg-accent"
-                      : "border-transparent hover:bg-accent/50",
-                  )}
-                >
-                  <img
-                    src={r.peerAvatar}
-                    alt={r.peerName}
-                    className="h-9 w-9 shrink-0 rounded-full border object-cover"
-                  />
-                  <div className="min-w-0 flex-1">
-                    <div className="flex items-center justify-between gap-2">
-                      <div className="truncate text-sm font-medium">
-                        {r.peerName}
+              {listItems.map((r) => {
+                const urgency = tab === "watchlist" ? urgencyOf(r) : null;
+                const days =
+                  tab === "watchlist"
+                    ? daysSince(r.decidedAt ?? r.requestedAt)
+                    : 0;
+                return (
+                  <button
+                    key={r.id}
+                    onClick={() => setActiveId(r.id)}
+                    className={cn(
+                      "flex w-full items-start gap-2 rounded-md border p-2 text-left transition-colors",
+                      r.id === activeId
+                        ? "border-primary bg-accent"
+                        : "border-transparent hover:bg-accent/50",
+                    )}
+                  >
+                    <img
+                      src={r.peerAvatar}
+                      alt={r.peerName}
+                      className="h-9 w-9 shrink-0 rounded-full border object-cover"
+                    />
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center justify-between gap-2">
+                        <div className="flex min-w-0 items-center gap-1.5">
+                          <div className="truncate text-sm font-medium">
+                            {r.peerName}
+                          </div>
+                          {urgency && <UrgencyBadge urgency={urgency} />}
+                        </div>
+                        <div className="shrink-0 text-[10px] text-muted-foreground">
+                          {r.decidedAt ?? r.requestedAt}
+                        </div>
                       </div>
-                      <div className="shrink-0 text-[10px] text-muted-foreground">
-                        {r.decidedAt ?? r.requestedAt}
+                      <div className="truncate text-xs text-muted-foreground">
+                        {r.peerHandle}
+                      </div>
+                      <div className="mt-1 flex flex-wrap items-center gap-1">
+                        {tab === "watchlist" ? (
+                          <span className="text-[10px] text-muted-foreground">
+                            拒绝已 {days} 天
+                          </span>
+                        ) : (
+                          <>
+                            <Badge
+                              variant="outline"
+                              className="h-4 px-1 text-[10px] font-normal"
+                            >
+                              {SOURCE_LABEL[r.source]}
+                            </Badge>
+                            {r.mutualFriends > 0 && (
+                              <span className="text-[10px] text-muted-foreground">
+                                共同好友 {r.mutualFriends}
+                              </span>
+                            )}
+                          </>
+                        )}
                       </div>
                     </div>
-                    <div className="truncate text-xs text-muted-foreground">
-                      {r.peerHandle}
-                    </div>
-                    <div className="mt-1 flex flex-wrap items-center gap-1">
-                      <Badge
-                        variant="outline"
-                        className="h-4 px-1 text-[10px] font-normal"
-                      >
-                        {SOURCE_LABEL[r.source]}
-                      </Badge>
-                      {r.mutualFriends > 0 && (
-                        <span className="text-[10px] text-muted-foreground">
-                          共同好友 {r.mutualFriends}
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                </button>
-              ))}
+                  </button>
+                );
+              })}
               {listItems.length === 0 && (
                 <div className="px-3 py-12 text-center text-xs text-muted-foreground">
-                  暂无{tab === "pending" ? "待处理申请" : tab === "accepted" ? "好友" : "已拒绝记录"}
+                  暂无
+                  {tab === "pending"
+                    ? "待处理申请"
+                    : tab === "accepted"
+                      ? "好友"
+                      : tab === "rejected"
+                        ? "已拒绝记录"
+                        : "持续关注对象"}
                 </div>
               )}
             </div>
@@ -679,6 +809,43 @@ function FriendsPage() {
         </>
       )}
     </div>
+  );
+}
+
+function UrgencyBadge({
+  urgency,
+}: {
+  urgency: "reapplied" | "overdue" | "watching";
+}) {
+  if (urgency === "reapplied") {
+    return (
+      <Badge
+        variant="outline"
+        className="h-4 gap-0.5 border-destructive/40 bg-destructive/10 px-1 text-[10px] font-normal text-destructive"
+      >
+        <AlertCircle className="h-2.5 w-2.5" />
+        再次申请
+      </Badge>
+    );
+  }
+  if (urgency === "overdue") {
+    return (
+      <Badge
+        variant="outline"
+        className="h-4 gap-0.5 border-warning/40 bg-warning/10 px-1 text-[10px] font-normal text-warning"
+      >
+        <Clock className="h-2.5 w-2.5" />
+        建议跟进
+      </Badge>
+    );
+  }
+  return (
+    <Badge
+      variant="outline"
+      className="h-4 gap-0.5 px-1 text-[10px] font-normal text-muted-foreground"
+    >
+      关注中
+    </Badge>
   );
 }
 

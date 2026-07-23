@@ -159,25 +159,52 @@ function build(): { accounts: ManagedAccount[]; requests: FriendRequest[] } {
         note: i === 0 ? "潜在合作对象，保持互动" : undefined,
       });
     }
-    // 已拒绝 1 条
-    {
-      const seed = PEER_POOL[(aIdx * 7 + 1) % PEER_POOL.length];
+    // 已拒绝 2 条：其中部分加入「持续关注」，并模拟对方再次申请
+    for (let i = 0; i < 2; i++) {
+      const seed = PEER_POOL[(aIdx * 7 + 1 + i * 4) % PEER_POOL.length];
+      const suffix = i === 0 ? " Jr." : "";
+      const handleSuffix = i === 0 ? "_jr" : "_v2";
+      const peerName = seed.name + suffix;
+      const peerHandle = seed.handle + handleSuffix;
+      const peerAvatar = `https://api.dicebear.com/7.x/notionists/svg?seed=${encodeURIComponent(seed.handle + "-r" + i)}`;
+      // 拒绝时长：第 0 条 ~3 天前（新近），第 1 条 ~45 天前（超期待跟进）
+      const daysAgo = i === 0 ? 3 : 45;
+      // 关注策略：所有第 1 条（超期）+ 偶数 idx 的第 0 条 -> 加入持续关注
+      const watchlisted = i === 1 || aIdx % 2 === 0;
       requests.push({
-        id: `fr-${acc.id}-r0`,
+        id: `fr-${acc.id}-r${i}`,
         accountId: acc.id,
         status: "rejected",
-        peerName: seed.name + " Jr.",
-        peerHandle: seed.handle + "_jr",
-        peerAvatar: `https://api.dicebear.com/7.x/notionists/svg?seed=${encodeURIComponent(seed.handle + "-r0")}`,
+        peerName,
+        peerHandle,
+        peerAvatar,
         peerLang: seed.lang,
         requestText: seed.text,
         requestTranslation: seed.lang === "zh" ? undefined : seed.zh,
         mutualFriends: 0,
         source: "search",
-        requestedAt: timeAgo(60 * 24 * 3 + aIdx * 20),
-        decidedAt: timeAgo(60 * 24 * 3 - 60),
-        note: "疑似营销账号，暂不通过",
+        requestedAt: timeAgo(60 * 24 * (daysAgo + 1) + aIdx * 20),
+        decidedAt: timeAgo(60 * 24 * daysAgo - 60),
+        note: i === 0 ? "疑似营销账号，暂不通过" : "等 Q3 产品上线后再联系",
+        watchlisted,
       });
+      // 若已加入持续关注，且是前 3 个账号的第 0 条，模拟对方再次申请
+      if (watchlisted && i === 0 && aIdx < 3) {
+        requests.push({
+          id: `fr-${acc.id}-reapp0`,
+          accountId: acc.id,
+          status: "pending",
+          peerName,
+          peerHandle,
+          peerAvatar,
+          peerLang: seed.lang,
+          requestText: seed.text,
+          requestTranslation: seed.lang === "zh" ? undefined : seed.zh,
+          mutualFriends: 1,
+          source: "search",
+          requestedAt: timeAgo(60 * (aIdx + 2)),
+        });
+      }
     }
   });
 
