@@ -371,6 +371,9 @@ function ConversationItem({
   accountLabel?: string;
 }) {
   const last = conv.messages[conv.messages.length - 1];
+  const failedCount = conv.messages.filter(
+    (m) => m.direction === "out" && m.status === "failed",
+  ).length;
   const preview =
     last.direction === "in"
       ? last.translation ?? last.text
@@ -427,6 +430,15 @@ function ConversationItem({
             {last.direction === "out" ? "我: " : ""}
             {preview}
           </p>
+          {failedCount > 0 && (
+            <Badge
+              variant="outline"
+              className="h-4 shrink-0 gap-0.5 rounded-full border-destructive/40 bg-destructive/10 px-1 text-[10px] font-normal text-destructive"
+            >
+              <AlertCircle className="h-2.5 w-2.5" />
+              {failedCount} 未送达
+            </Badge>
+          )}
           {conv.unread > 0 && (
             <Badge className="h-4 min-w-[16px] justify-center rounded-full bg-destructive px-1 text-[10px] text-destructive-foreground">
               {conv.unread}
@@ -528,7 +540,17 @@ function ChatWindow({
       const failed = Math.random() < 0.15;
       if (failed) {
         onPatch(msgId, { status: "failed", failReason: "网络异常，消息未送达" });
-        toast.error("发送失败，可点击重试");
+        toast.error(`私信发送失败 · 对方「${conv.peerName}」`, {
+          description: "网络异常，消息未送达。可点击重试或稍后再发。",
+          duration: 6000,
+          action: {
+            label: "重试",
+            onClick: () => {
+              onPatch(msgId, { status: "sending", failReason: undefined });
+              simulateSend(msgId);
+            },
+          },
+        });
       } else {
         onPatch(msgId, { status: "sent" });
       }
@@ -538,6 +560,20 @@ function ChatWindow({
   const handleRetry = (msg: DirectMessage) => {
     onPatch(msg.id, { status: "sending", failReason: undefined });
     simulateSend(msg.id);
+  };
+
+  const failedMessages = useMemo(
+    () => conv.messages.filter((m) => m.direction === "out" && m.status === "failed"),
+    [conv.messages],
+  );
+
+  const handleRetryAll = () => {
+    if (failedMessages.length === 0) return;
+    failedMessages.forEach((m) => {
+      onPatch(m.id, { status: "sending", failReason: undefined });
+      simulateSend(m.id);
+    });
+    toast.info(`正在重试 ${failedMessages.length} 条消息…`);
   };
 
   const handleSend = () => {
@@ -600,6 +636,26 @@ function ChatWindow({
           </TooltipContent>
         </Tooltip>
       </div>
+
+      {/* 失败提醒条 */}
+      {failedMessages.length > 0 && (
+        <div className="flex items-center gap-2 border-b border-destructive/30 bg-destructive/10 px-4 py-2 text-xs text-destructive">
+          <AlertCircle className="h-3.5 w-3.5 shrink-0" />
+          <span className="flex-1">
+            当前会话有 <span className="font-semibold">{failedMessages.length}</span> 条消息未送达，请及时处理。
+          </span>
+          <Button
+            size="sm"
+            variant="outline"
+            className="h-6 border-destructive/40 px-2 text-[11px] text-destructive hover:bg-destructive/10 hover:text-destructive"
+            onClick={handleRetryAll}
+          >
+            <RotateCw className="mr-1 h-3 w-3" />
+            全部重试
+          </Button>
+        </div>
+      )}
+
 
       {/* Messages */}
       <ScrollArea className="flex-1">
