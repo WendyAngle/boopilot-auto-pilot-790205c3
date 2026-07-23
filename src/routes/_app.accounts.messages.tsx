@@ -422,8 +422,9 @@ function ConversationItem({
             <span className="truncate text-sm font-medium">{conv.peerName}</span>
           </div>
           <div className="flex shrink-0 items-center gap-1">
-            <span className="text-[10px] text-muted-foreground" title={conv.updatedAt}>
-              {conv.updatedAt.slice(5, 16)}
+            <span className="whitespace-nowrap text-right text-[10px] leading-tight text-muted-foreground" title={conv.updatedAt}>
+              <span className="block">{conv.updatedAt.slice(0, 10)}</span>
+              <span className="block">{conv.updatedAt.slice(11, 16)}</span>
             </span>
             <button
               type="button"
