@@ -11,6 +11,9 @@ import {
   RotateCcw,
   Trash2,
   Sparkles,
+  Info,
+  Bell,
+  BellRing,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -183,9 +186,29 @@ function FriendsPage() {
 
   const restore = () => {
     if (!active) return;
-    patch(active.id, { status: "pending", decidedAt: undefined });
-    toast.success("已恢复为待处理");
+    patch(active.id, {
+      status: "pending",
+      decidedAt: undefined,
+      publicReasonZh: undefined,
+      publicReasonText: undefined,
+      watchlisted: undefined,
+    });
+    toast.success("已恢复为待处理，可重新决策通过或拒绝");
     setRestoreOpen(false);
+  };
+
+  const toggleWatchlist = () => {
+    if (!active) return;
+    const next = !active.watchlisted;
+    patch(active.id, { watchlisted: next });
+    toast.success(next ? "已加入持续关注：对方再次申请将高亮提醒" : "已移出持续关注");
+  };
+
+  const invitePeer = () => {
+    if (!active || !activeAccount) return;
+    toast.success(
+      `已生成主动添加任务：将由「${activeAccount.username}」向「${active.peerName}」发起好友邀请`,
+    );
   };
 
   const removeFriend = () => {
@@ -467,11 +490,28 @@ function FriendsPage() {
                     </>
                   )}
 
-                  {/* 已拒绝：拒绝时间 + 对外说明 */}
+                  {/* 已拒绝：平台事实说明 + 拒绝时间 + 对外说明 */}
                   {active.status === "rejected" && (
                     <>
+                      <div className="flex items-start gap-2 rounded-md border border-amber-200 bg-amber-50 p-3 text-xs text-amber-900 dark:border-amber-900/40 dark:bg-amber-950/30 dark:text-amber-200">
+                        <Info className="mt-0.5 h-3.5 w-3.5 flex-none" />
+                        <div className="space-y-1 leading-relaxed">
+                          <div className="font-medium">
+                            关于「已拒绝」的平台事实
+                          </div>
+                          <div>
+                            多数平台拒绝后原申请即失效、不可复活。此处「恢复为待处理」仅回滚本工作台的决策记录，不会让对方那侧重新看到申请。若需重新建立好友关系，请使用下方「主动添加」或等待对方再次申请。
+                          </div>
+                        </div>
+                      </div>
                       {active.decidedAt && (
                         <MetaLine label="拒绝时间" value={active.decidedAt} />
+                      )}
+                      {active.watchlisted && (
+                        <div className="flex items-center gap-1.5 text-xs text-primary">
+                          <BellRing className="h-3.5 w-3.5" />
+                          已加入持续关注，对方再次申请将高亮提醒
+                        </div>
                       )}
                       {active.publicReasonZh && (
                         <div className="rounded-md border p-3">
@@ -551,15 +591,43 @@ function FriendsPage() {
                   </Button>
                 )}
                 {active.status === "rejected" && (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setRestoreOpen(true)}
-                    className="gap-1.5"
-                  >
-                    <RotateCcw className="h-3.5 w-3.5" />
-                    恢复为待处理
-                  </Button>
+                  <>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={toggleWatchlist}
+                      className="gap-1.5"
+                    >
+                      {active.watchlisted ? (
+                        <>
+                          <BellRing className="h-3.5 w-3.5 text-primary" />
+                          取消关注
+                        </>
+                      ) : (
+                        <>
+                          <Bell className="h-3.5 w-3.5" />
+                          标记持续关注
+                        </>
+                      )}
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setRestoreOpen(true)}
+                      className="gap-1.5"
+                    >
+                      <RotateCcw className="h-3.5 w-3.5" />
+                      恢复为待处理
+                    </Button>
+                    <Button
+                      size="sm"
+                      onClick={invitePeer}
+                      className="gap-1.5"
+                    >
+                      <UserPlus className="h-3.5 w-3.5" />
+                      主动向 TA 发起邀请
+                    </Button>
+                  </>
                 )}
               </div>
             </>
@@ -622,8 +690,16 @@ function FriendsPage() {
             <AlertDialogContent>
               <AlertDialogHeader>
                 <AlertDialogTitle>恢复为待处理？</AlertDialogTitle>
-                <AlertDialogDescription>
-                  该好友申请将回到「待处理」队列，你可以重新决定通过或拒绝。
+                <AlertDialogDescription asChild>
+                  <div className="space-y-2 text-sm text-muted-foreground">
+                    <div>
+                      该申请将回到「待处理」队列，你可以重新决定通过或拒绝。之前填写的对外说明会被清除。
+                    </div>
+                    <div className="rounded-md border border-amber-200 bg-amber-50 p-2.5 text-xs leading-relaxed text-amber-900 dark:border-amber-900/40 dark:bg-amber-950/30 dark:text-amber-200">
+                      <span className="font-medium">注意：</span>
+                      恢复仅为本工作台内部状态回滚，平台侧原申请已失效。如需重新建立好友关系，请使用「主动向 TA 发起邀请」，或等待对方再次申请。
+                    </div>
+                  </div>
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>
