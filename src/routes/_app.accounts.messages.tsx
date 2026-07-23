@@ -237,6 +237,72 @@ function MessagesPage() {
           {/* Column 2: Conversations */}
           <div className="flex min-h-0 flex-col border-r">
             <div className="border-b p-2.5 space-y-2">
+              {/* 筛选 Tabs + 范围切换 */}
+              <div className="flex items-center justify-between gap-2">
+                <div className="inline-flex items-center rounded-md bg-muted p-0.5 text-xs">
+                  <button
+                    type="button"
+                    onClick={() => setFilter("all")}
+                    className={cn(
+                      "flex items-center gap-1 rounded px-2 py-0.5 transition-colors",
+                      filter === "all"
+                        ? "bg-background shadow-sm"
+                        : "text-muted-foreground hover:text-foreground",
+                    )}
+                  >
+                    全部
+                    <span className="text-[10px] text-muted-foreground">
+                      {scopedConvs.length}
+                    </span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setFilter("starred")}
+                    className={cn(
+                      "flex items-center gap-1 rounded px-2 py-0.5 transition-colors",
+                      filter === "starred"
+                        ? "bg-background text-amber-700 shadow-sm dark:text-amber-300"
+                        : "text-muted-foreground hover:text-foreground",
+                    )}
+                  >
+                    <Star
+                      className="h-3 w-3"
+                      fill={filter === "starred" ? "currentColor" : "none"}
+                    />
+                    标星
+                    <span className="text-[10px] text-muted-foreground">
+                      {starredCount}
+                    </span>
+                  </button>
+                </div>
+                <div className="inline-flex items-center rounded-md border text-[11px]">
+                  <button
+                    type="button"
+                    onClick={() => setScope("current")}
+                    className={cn(
+                      "rounded-l-md px-2 py-0.5 transition-colors",
+                      scope === "current"
+                        ? "bg-accent text-foreground"
+                        : "text-muted-foreground hover:bg-accent/50",
+                    )}
+                  >
+                    当前账号
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setScope("all")}
+                    className={cn(
+                      "rounded-r-md border-l px-2 py-0.5 transition-colors",
+                      scope === "all"
+                        ? "bg-accent text-foreground"
+                        : "text-muted-foreground hover:bg-accent/50",
+                    )}
+                  >
+                    全部账号
+                  </button>
+                </div>
+              </div>
+
               <div className="relative">
                 <Search className="absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
                 <Input
@@ -246,34 +312,13 @@ function MessagesPage() {
                   className="h-8 pl-8 text-sm"
                 />
               </div>
-              {isGlobalStarred ? (
-                <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                  <Star className="h-3 w-3 text-amber-500" fill="currentColor" />
-                  全部标星会话（{accountConvs.length}）
-                </div>
-              ) : (
-                <div className="flex items-center justify-between text-xs">
-                  <span className="text-muted-foreground">
-                    {accountConvs.length} 个会话
-                  </span>
-                  <button
-                    type="button"
-                    onClick={() => setStarredOnly((v) => !v)}
-                    className={cn(
-                      "flex items-center gap-1 rounded-full border px-2 py-0.5 transition-colors",
-                      starredOnly
-                        ? "border-amber-300 bg-amber-50 text-amber-700 dark:border-amber-800 dark:bg-amber-950/40 dark:text-amber-300"
-                        : "border-transparent text-muted-foreground hover:bg-accent",
-                    )}
-                  >
-                    <Star
-                      className="h-3 w-3"
-                      fill={starredOnly ? "currentColor" : "none"}
-                    />
-                    仅看标星
-                  </button>
-                </div>
-              )}
+
+              <div className="flex items-center justify-between text-[11px] text-muted-foreground">
+                <span>共 {accountConvs.length} 个会话</span>
+                {isAllScope && (
+                  <span className="rounded bg-muted px-1.5 py-0.5">跨账号视图</span>
+                )}
+              </div>
             </div>
             <ScrollArea className="flex-1">
               <div className="p-1.5">
@@ -287,7 +332,7 @@ function MessagesPage() {
                       onClick={() => setActiveConvId(c.id)}
                       onToggleStar={() => toggleStar(c.id)}
                       accountLabel={
-                        isGlobalStarred && acc
+                        isAllScope && acc
                           ? `${acc.username} · ${acc.platform}`
                           : undefined
                       }
@@ -297,11 +342,11 @@ function MessagesPage() {
                 {accountConvs.length === 0 && (
                   <div className="flex flex-col items-center gap-2 px-2 py-10 text-center text-xs text-muted-foreground">
                     <MessageSquare className="h-6 w-6 opacity-50" />
-                    {isGlobalStarred
-                      ? "暂无标星会话，点击会话卡片右上角的星标可加入"
-                      : starredOnly
-                        ? "该账号下暂无标星会话"
-                        : "暂无私信会话"}
+                    {filter === "starred"
+                      ? isAllScope
+                        ? "暂无标星会话，点击会话卡片右上角的星标可加入"
+                        : "该账号下暂无标星会话"
+                      : "暂无私信会话"}
                   </div>
                 )}
               </div>
