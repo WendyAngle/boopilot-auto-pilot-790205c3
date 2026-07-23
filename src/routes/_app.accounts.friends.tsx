@@ -390,8 +390,8 @@ function FriendsPage() {
         {/* 中：分类与列表 */}
         <div className="flex min-h-0 flex-col rounded-lg border bg-card">
           <div className="border-b p-2">
-            <Tabs value={tab} onValueChange={(v) => setTab(v as FriendStatus)}>
-              <TabsList className="grid w-full grid-cols-3">
+            <Tabs value={tab} onValueChange={(v) => setTab(v as TabKey)}>
+              <TabsList className="grid w-full grid-cols-4">
                 <TabsTrigger value="pending" className="gap-1.5">
                   待处理
                   {countsForActive.pending > 0 && (
@@ -414,6 +414,14 @@ function FriendsPage() {
                   <span className="text-[10px] text-muted-foreground">
                     {countsForActive.rejected}
                   </span>
+                </TabsTrigger>
+                <TabsTrigger value="watchlist" className="gap-1.5">
+                  持续关注
+                  {countsForActive.watchlist > 0 && (
+                    <span className="text-[10px] text-muted-foreground">
+                      {countsForActive.watchlist}
+                    </span>
+                  )}
                 </TabsTrigger>
               </TabsList>
             </Tabs>
