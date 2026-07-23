@@ -354,7 +354,7 @@ function FriendsPage() {
                         {r.peerName}
                       </div>
                       <div className="shrink-0 text-[10px] text-muted-foreground">
-                        {(r.decidedAt ?? r.requestedAt).slice(5, 16)}
+                        {r.decidedAt ?? r.requestedAt}
                       </div>
                     </div>
                     <div className="truncate text-xs text-muted-foreground">
@@ -430,7 +430,7 @@ function FriendsPage() {
                     <MetaCell
                       icon={<MessageSquareText className="h-3.5 w-3.5" />}
                       label="申请时间"
-                      value={active.requestedAt.slice(5, 16)}
+                      value={active.requestedAt}
                     />
                   </div>
 
