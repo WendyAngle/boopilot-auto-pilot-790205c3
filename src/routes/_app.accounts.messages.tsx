@@ -342,6 +342,7 @@ function MessagesPage() {
                 accountPlatform={activeAccount.platform}
                 onSend={handleSend}
                 onPatch={(msgId, patch) => patchMessage(activeConv.id, msgId, patch)}
+                onToggleStar={() => toggleStar(activeConv.id)}
               />
             ) : (
               <div className="flex flex-1 flex-col items-center justify-center gap-3 text-sm text-muted-foreground">
