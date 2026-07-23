@@ -422,7 +422,7 @@ function ConversationItem({
             <span className="truncate text-sm font-medium">{conv.peerName}</span>
           </div>
           <div className="flex shrink-0 items-center gap-1">
-            <span className="text-[10px] text-muted-foreground">
+            <span className="text-[10px] text-muted-foreground" title={conv.updatedAt}>
               {conv.updatedAt.slice(5, 16)}
             </span>
             <button
