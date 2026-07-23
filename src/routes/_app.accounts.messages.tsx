@@ -417,38 +417,27 @@ function ConversationItem({
     >
       <img src={conv.peerAvatar} alt="" className="h-9 w-9 shrink-0 rounded-full bg-muted" />
       <div className="min-w-0 flex-1">
-        <div className="flex items-start justify-between gap-2">
+        <div className="flex items-center justify-between gap-2">
           <span className="min-w-0 flex-1 truncate text-sm font-medium" title={conv.peerName}>{conv.peerName}</span>
-          <div className="flex shrink-0 items-center gap-1">
-            <span className="whitespace-nowrap tabular-nums text-[10px] leading-5 text-muted-foreground" title={conv.updatedAt}>
-              {conv.updatedAt.slice(0, 16)}
-            </span>
-            <button
-              type="button"
-              onClick={(e) => {
-                e.stopPropagation();
-                onToggleStar();
-              }}
-              aria-label={conv.starred ? "取消标星" : "加入标星"}
-              className={cn(
-                "flex h-5 w-5 shrink-0 items-center justify-center rounded transition-colors",
-                conv.starred
-                  ? "text-amber-500"
-                  : "text-muted-foreground/40 opacity-0 hover:text-amber-500 group-hover:opacity-100",
-              )}
-            >
-              <Star
-                className="h-3.5 w-3.5"
-                fill={conv.starred ? "currentColor" : "none"}
-              />
-            </button>
-          </div>
+          <span className="shrink-0 whitespace-nowrap tabular-nums text-[10px] leading-4 text-muted-foreground" title={conv.updatedAt}>
+            {conv.updatedAt.slice(0, 16)}
+          </span>
         </div>
-        <div className="flex items-center gap-1.5">
+        <div className="mt-0.5 flex items-center gap-1.5">
           <p className="min-w-0 flex-1 truncate text-xs text-muted-foreground" title={`${last.direction === "out" ? "我: " : ""}${preview}`}>
             {last.direction === "out" ? "我: " : ""}
             {preview}
           </p>
+          {conv.unread > 0 && (
+            <Badge className="h-4 min-w-[16px] shrink-0 justify-center rounded-full bg-destructive px-1 text-[10px] text-destructive-foreground">
+              {conv.unread}
+            </Badge>
+          )}
+        </div>
+        <div className="mt-1 flex items-center gap-1">
+          <Badge variant="outline" className="h-4 shrink-0 rounded px-1 text-[9px] font-normal">
+            {LANG_LABEL[conv.peerLang]}
+          </Badge>
           {failedCount > 0 && (
             <Badge
               variant="outline"
@@ -458,16 +447,6 @@ function ConversationItem({
               {failedCount} 未送达
             </Badge>
           )}
-          {conv.unread > 0 && (
-            <Badge className="h-4 min-w-[16px] justify-center rounded-full bg-destructive px-1 text-[10px] text-destructive-foreground">
-              {conv.unread}
-            </Badge>
-          )}
-        </div>
-        <div className="mt-0.5 flex items-center gap-1">
-          <Badge variant="outline" className="h-4 rounded px-1 text-[9px] font-normal">
-            {LANG_LABEL[conv.peerLang]}
-          </Badge>
           {conv.starred && conv.starredNote && (
             <span className="truncate text-[10px] text-amber-600 dark:text-amber-400">
               · {conv.starredNote}
@@ -478,6 +457,22 @@ function ConversationItem({
               · 来自 {accountLabel}
             </span>
           )}
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              onToggleStar();
+            }}
+            aria-label={conv.starred ? "取消标星" : "加入标星"}
+            className={cn(
+              "ml-auto flex h-5 w-5 shrink-0 items-center justify-center rounded transition-colors",
+              conv.starred
+                ? "text-amber-500"
+                : "text-muted-foreground/40 opacity-0 hover:text-amber-500 group-hover:opacity-100",
+            )}
+          >
+            <Star className="h-3.5 w-3.5" fill={conv.starred ? "currentColor" : "none"} />
+          </button>
         </div>
       </div>
     </div>
