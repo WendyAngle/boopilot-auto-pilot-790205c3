@@ -21,6 +21,9 @@ export const LANG_LABEL: Record<MsgLang, string> = {
   th: "ไทย",
 };
 
+/** 出站消息发送状态 */
+export type SendStatus = "sending" | "sent" | "failed";
+
 export interface DirectMessage {
   id: string;
   direction: MsgDirection;
@@ -35,6 +38,10 @@ export interface DirectMessage {
   time: string;
   /** in 方向是否已读 */
   read?: boolean;
+  /** out 方向的发送状态 */
+  status?: SendStatus;
+  /** 发送失败时的原因（仅 status=failed） */
+  failReason?: string;
 }
 
 export interface Conversation {
