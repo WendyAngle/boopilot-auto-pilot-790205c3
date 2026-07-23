@@ -238,6 +238,36 @@ function buildAll(): { accounts: ManagedAccount[]; conversations: Conversation[]
         });
       }
 
+      // 追加不同发送状态的出站消息（mock 覆盖 sending/failed）
+      // 规则：c===1 追加发送失败，c===2 追加发送中，其他保持已发送
+      if (c === 1) {
+        const failZh = "好的，稍后为您处理，请稍候片刻～";
+        const failOrig = seed.lang === "zh" ? failZh : translateZhTo(seed.lang, failZh);
+        msgs.push({
+          id: `${convId}-m-fail`,
+          direction: "out",
+          lang: seed.lang,
+          text: failOrig,
+          sourceZh: failZh,
+          time: timeAgo(t0 - 90),
+          status: "failed",
+          failReason: "网络异常，消息未送达",
+        });
+      } else if (c === 2) {
+        const sendingZh = "感谢您的耐心等待，正在为您核实中。";
+        const sendingOrig = seed.lang === "zh" ? sendingZh : translateZhTo(seed.lang, sendingZh);
+        msgs.push({
+          id: `${convId}-m-sending`,
+          direction: "out",
+          lang: seed.lang,
+          text: sendingOrig,
+          sourceZh: sendingZh,
+          time: timeAgo(t0 - 90),
+          status: "sending",
+        });
+      }
+
+
       const lastMsg = msgs[msgs.length - 1];
       const unread = msgs.filter((m) => m.direction === "in" && !m.read).length;
       conversations.push({
