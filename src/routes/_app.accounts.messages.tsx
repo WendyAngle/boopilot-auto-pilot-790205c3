@@ -211,8 +211,8 @@ function MessagesPage() {
                         </span>
                       </div>
                       <div className="min-w-0 flex-1">
-                        <div className="truncate text-sm font-medium">{a.username}</div>
-                        <div className="truncate text-xs text-muted-foreground">
+                        <div className="truncate text-sm font-medium" title={`${a.username} · ${a.platformId ?? ""}`}>{a.username}</div>
+                        <div className="truncate text-xs text-muted-foreground" title={a.tenantName}>
                           {a.tenantName}
                         </div>
                       </div>
