@@ -614,11 +614,6 @@ function FriendsPage() {
                       onClick={invitePeer}
                       className="gap-1.5"
                     >
-                    <Button
-                      size="sm"
-                      onClick={invitePeer}
-                      className="gap-1.5"
-                    >
                       <UserPlus className="h-3.5 w-3.5" />
                       主动向 TA 发起邀请
                     </Button>
