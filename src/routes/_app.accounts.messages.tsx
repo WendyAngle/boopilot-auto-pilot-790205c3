@@ -32,7 +32,8 @@ export const Route = createFileRoute("/_app/accounts/messages")({
   component: MessagesPage,
 });
 
-const GLOBAL_STARRED_ID = "__starred__";
+type ScopeKey = "current" | "all";
+type FilterKey = "all" | "starred";
 
 function MessagesPage() {
   const { accounts, conversations: initialConvs } = useMemo(() => getInboxData(), []);
@@ -40,9 +41,10 @@ function MessagesPage() {
   const [activeAccountId, setActiveAccountId] = useState<string>(accounts[0]?.id ?? "");
   const [activeConvId, setActiveConvId] = useState<string>("");
   const [keyword, setKeyword] = useState("");
-  const [starredOnly, setStarredOnly] = useState(false);
+  const [scope, setScope] = useState<ScopeKey>("current");
+  const [filter, setFilter] = useState<FilterKey>("all");
 
-  const isGlobalStarred = activeAccountId === GLOBAL_STARRED_ID;
+  const isAllScope = scope === "all";
 
   // 账号维度未读汇总
   const unreadByAccount = useMemo(() => {
@@ -53,19 +55,20 @@ function MessagesPage() {
     return map;
   }, [conversations]);
 
+  // 计数：当前作用范围下的 全部 / 标星
+  const scopedConvs = useMemo(
+    () => (isAllScope ? conversations : conversations.filter((c) => c.accountId === activeAccountId)),
+    [conversations, isAllScope, activeAccountId],
+  );
   const starredCount = useMemo(
-    () => conversations.filter((c) => c.starred).length,
-    [conversations],
+    () => scopedConvs.filter((c) => c.starred).length,
+    [scopedConvs],
   );
 
   const accountConvs = useMemo(() => {
     const kw = keyword.trim().toLowerCase();
-    return conversations
-      .filter((c) =>
-        isGlobalStarred
-          ? c.starred
-          : c.accountId === activeAccountId && (!starredOnly || c.starred),
-      )
+    return scopedConvs
+      .filter((c) => (filter === "starred" ? c.starred : true))
       .filter((c) =>
         kw
           ? c.peerName.toLowerCase().includes(kw) ||
@@ -74,7 +77,7 @@ function MessagesPage() {
           : true,
       )
       .sort((a, b) => (a.updatedAt < b.updatedAt ? 1 : -1));
-  }, [conversations, activeAccountId, keyword, starredOnly, isGlobalStarred]);
+  }, [scopedConvs, keyword, filter]);
 
   // 默认选中该账号的第一条会话
   useEffect(() => {
