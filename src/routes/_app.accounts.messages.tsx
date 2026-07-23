@@ -528,7 +528,17 @@ function ChatWindow({
       const failed = Math.random() < 0.15;
       if (failed) {
         onPatch(msgId, { status: "failed", failReason: "网络异常，消息未送达" });
-        toast.error("发送失败，可点击重试");
+        toast.error(`私信发送失败 · 对方「${conv.peerName}」`, {
+          description: "网络异常，消息未送达。可点击重试或稍后再发。",
+          duration: 6000,
+          action: {
+            label: "重试",
+            onClick: () => {
+              onPatch(msgId, { status: "sending", failReason: undefined });
+              simulateSend(msgId);
+            },
+          },
+        });
       } else {
         onPatch(msgId, { status: "sent" });
       }
@@ -538,6 +548,20 @@ function ChatWindow({
   const handleRetry = (msg: DirectMessage) => {
     onPatch(msg.id, { status: "sending", failReason: undefined });
     simulateSend(msg.id);
+  };
+
+  const failedMessages = useMemo(
+    () => conv.messages.filter((m) => m.direction === "out" && m.status === "failed"),
+    [conv.messages],
+  );
+
+  const handleRetryAll = () => {
+    if (failedMessages.length === 0) return;
+    failedMessages.forEach((m) => {
+      onPatch(m.id, { status: "sending", failReason: undefined });
+      simulateSend(m.id);
+    });
+    toast.info(`正在重试 ${failedMessages.length} 条消息…`);
   };
 
   const handleSend = () => {
