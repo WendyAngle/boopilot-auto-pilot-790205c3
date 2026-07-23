@@ -391,8 +391,8 @@ function FriendsPage() {
         <div className="flex min-h-0 flex-col rounded-lg border bg-card">
           <div className="border-b p-2">
             <Tabs value={tab} onValueChange={(v) => setTab(v as TabKey)}>
-              <TabsList className="grid w-full grid-cols-4">
-                <TabsTrigger value="pending" className="gap-1.5">
+              <TabsList className="grid w-full grid-cols-4 gap-0.5">
+                <TabsTrigger value="pending" className="gap-1 px-1.5 text-xs">
                   待处理
                   {countsForActive.pending > 0 && (
                     <Badge
@@ -403,19 +403,19 @@ function FriendsPage() {
                     </Badge>
                   )}
                 </TabsTrigger>
-                <TabsTrigger value="accepted" className="gap-1.5">
+                <TabsTrigger value="accepted" className="gap-1 px-1.5 text-xs">
                   好友
                   <span className="text-[10px] text-muted-foreground">
                     {countsForActive.accepted}
                   </span>
                 </TabsTrigger>
-                <TabsTrigger value="rejected" className="gap-1.5">
+                <TabsTrigger value="rejected" className="gap-1 px-1.5 text-xs">
                   已拒绝
                   <span className="text-[10px] text-muted-foreground">
                     {countsForActive.rejected}
                   </span>
                 </TabsTrigger>
-                <TabsTrigger value="watchlist" className="gap-1.5">
+                <TabsTrigger value="watchlist" className="gap-1 px-1.5 text-xs">
                   持续关注
                   {countsForActive.watchlist > 0 && (
                     <span className="text-[10px] text-muted-foreground">
