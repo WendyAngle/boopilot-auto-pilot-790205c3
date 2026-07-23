@@ -447,7 +447,7 @@ function ConversationItem({
           </div>
         </div>
         <div className="flex items-center gap-1.5">
-          <p className="min-w-0 flex-1 truncate text-xs text-muted-foreground">
+          <p className="min-w-0 flex-1 truncate text-xs text-muted-foreground" title={`${last.direction === "out" ? "我: " : ""}${preview}`}>
             {last.direction === "out" ? "我: " : ""}
             {preview}
           </p>
