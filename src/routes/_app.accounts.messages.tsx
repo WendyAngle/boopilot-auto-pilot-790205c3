@@ -545,7 +545,7 @@ function ChatWindow({
           <div className="mt-2 flex justify-end">
             <Button size="sm" onClick={handleSend} disabled={!draftZh.trim()} className="gap-1.5">
               <Send className="h-3.5 w-3.5" />
-              立即回复
+              发送回复
             </Button>
           </div>
         </div>
