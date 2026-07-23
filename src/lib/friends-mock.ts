@@ -60,6 +60,8 @@ export interface FriendRequest {
   publicReasonZh?: string;
   /** 拒绝时对外说明（对方语种译文） */
   publicReasonText?: string;
+  /** 已拒绝后是否加入「持续关注」名单：对方若再次申请将高亮提醒 */
+  watchlisted?: boolean;
 }
 
 const PEER_POOL: Array<{
