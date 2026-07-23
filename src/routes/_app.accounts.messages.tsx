@@ -176,7 +176,7 @@ function MessagesPage() {
           </div>
         </div>
 
-        <div className="grid h-[calc(100vh-13rem)] grid-cols-[220px_380px_1fr] gap-3 rounded-xl border bg-card shadow-[var(--shadow-card)]">
+        <div className="grid h-[calc(100vh-13rem)] grid-cols-[220px_360px_1fr] gap-3 rounded-xl border bg-card shadow-[var(--shadow-card)]">
           {/* Column 1: Accounts */}
           <div className="flex min-h-0 flex-col border-r">
             <div className="border-b px-3 py-2.5 text-sm font-medium">账号</div>
