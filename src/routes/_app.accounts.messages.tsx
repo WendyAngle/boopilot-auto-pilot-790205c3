@@ -314,11 +314,13 @@ function ChatWindow({
   accountName,
   accountPlatform,
   onSend,
+  onPatch,
 }: {
   conv: Conversation;
   accountName: string;
   accountPlatform: string;
   onSend: (msg: DirectMessage) => void;
+  onPatch: (msgId: string, patch: Partial<DirectMessage>) => void;
 }) {
   const [draftZh, setDraftZh] = useState("");
   const [translated, setTranslated] = useState("");
