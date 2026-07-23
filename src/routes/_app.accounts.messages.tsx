@@ -430,6 +430,15 @@ function ConversationItem({
             {last.direction === "out" ? "我: " : ""}
             {preview}
           </p>
+          {failedCount > 0 && (
+            <Badge
+              variant="outline"
+              className="h-4 shrink-0 gap-0.5 rounded-full border-destructive/40 bg-destructive/10 px-1 text-[10px] font-normal text-destructive"
+            >
+              <AlertCircle className="h-2.5 w-2.5" />
+              {failedCount} 未送达
+            </Badge>
+          )}
           {conv.unread > 0 && (
             <Badge className="h-4 min-w-[16px] justify-center rounded-full bg-destructive px-1 text-[10px] text-destructive-foreground">
               {conv.unread}
