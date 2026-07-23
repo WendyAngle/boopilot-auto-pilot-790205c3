@@ -229,35 +229,8 @@ function MessagesPage() {
                     暂无账号
                   </div>
                 )}
-                {/* 全部标星（跨账号聚合视图） */}
-                {accounts.length > 0 && (
-                  <>
-                    <div className="my-1 border-t" />
-                    <button
-                      onClick={() => setActiveAccountId(GLOBAL_STARRED_ID)}
-                      className={cn(
-                        "flex w-full items-center gap-2 rounded-lg px-2 py-2 text-left text-sm transition-colors",
-                        isGlobalStarred ? "bg-accent" : "hover:bg-accent/50",
-                      )}
-                    >
-                      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-amber-100 text-amber-600 dark:bg-amber-950/40 dark:text-amber-300">
-                        <Star className="h-4 w-4" fill="currentColor" />
-                      </div>
-                      <div className="min-w-0 flex-1">
-                        <div className="truncate text-sm font-medium">全部标星</div>
-                        <div className="truncate text-xs text-muted-foreground">
-                          跨账号聚合
-                        </div>
-                      </div>
-                      {starredCount > 0 && (
-                        <Badge className="h-5 min-w-[20px] justify-center rounded-full bg-amber-500/90 px-1.5 text-[10px] text-white hover:bg-amber-500/90">
-                          {starredCount}
-                        </Badge>
-                      )}
-                    </button>
-                  </>
-                )}
               </div>
+
             </ScrollArea>
           </div>
 
