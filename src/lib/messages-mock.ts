@@ -56,6 +56,10 @@ export interface Conversation {
   unread: number;
   updatedAt: string;
   messages: DirectMessage[];
+  /** 是否标星（重点关注） */
+  starred?: boolean;
+  /** 标星备注（可选，仅内部可见） */
+  starredNote?: string;
 }
 
 // ---------- 生成器 ----------
