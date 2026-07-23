@@ -212,6 +212,7 @@ function buildAll(): { accounts: ManagedAccount[]; conversations: Conversation[]
           text: replyOrig,
           sourceZh: replyZh,
           time: timeAgo(t0 - 30),
+          status: "sent",
         });
 
         // 对方追问
