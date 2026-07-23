@@ -360,10 +360,14 @@ function ConversationItem({
   conv,
   active,
   onClick,
+  onToggleStar,
+  accountLabel,
 }: {
   conv: Conversation;
   active: boolean;
   onClick: () => void;
+  onToggleStar: () => void;
+  accountLabel?: string;
 }) {
   const last = conv.messages[conv.messages.length - 1];
   const preview =
@@ -371,20 +375,51 @@ function ConversationItem({
       ? last.translation ?? last.text
       : last.sourceZh ?? last.text;
   return (
-    <button
+    <div
       onClick={onClick}
+      role="button"
+      tabIndex={0}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          onClick();
+        }
+      }}
       className={cn(
-        "flex w-full items-start gap-2.5 rounded-lg px-2.5 py-2 text-left transition-colors",
+        "group flex w-full cursor-pointer items-start gap-2.5 rounded-lg px-2.5 py-2 text-left transition-colors",
         active ? "bg-accent" : "hover:bg-accent/50",
       )}
     >
       <img src={conv.peerAvatar} alt="" className="h-9 w-9 shrink-0 rounded-full bg-muted" />
       <div className="min-w-0 flex-1">
         <div className="flex items-center justify-between gap-2">
-          <span className="truncate text-sm font-medium">{conv.peerName}</span>
-          <span className="shrink-0 text-[10px] text-muted-foreground">
-            {conv.updatedAt.slice(5, 16)}
-          </span>
+          <div className="flex min-w-0 items-center gap-1">
+            <span className="truncate text-sm font-medium">{conv.peerName}</span>
+          </div>
+          <div className="flex shrink-0 items-center gap-1">
+            <span className="text-[10px] text-muted-foreground">
+              {conv.updatedAt.slice(5, 16)}
+            </span>
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                onToggleStar();
+              }}
+              aria-label={conv.starred ? "取消标星" : "加入标星"}
+              className={cn(
+                "flex h-5 w-5 items-center justify-center rounded transition-colors",
+                conv.starred
+                  ? "text-amber-500"
+                  : "text-muted-foreground/40 opacity-0 hover:text-amber-500 group-hover:opacity-100",
+              )}
+            >
+              <Star
+                className="h-3.5 w-3.5"
+                fill={conv.starred ? "currentColor" : "none"}
+              />
+            </button>
+          </div>
         </div>
         <div className="flex items-center gap-1.5">
           <p className="min-w-0 flex-1 truncate text-xs text-muted-foreground">
@@ -401,9 +436,19 @@ function ConversationItem({
           <Badge variant="outline" className="h-4 rounded px-1 text-[9px] font-normal">
             {LANG_LABEL[conv.peerLang]}
           </Badge>
+          {conv.starred && conv.starredNote && (
+            <span className="truncate text-[10px] text-amber-600 dark:text-amber-400">
+              · {conv.starredNote}
+            </span>
+          )}
+          {accountLabel && (
+            <span className="truncate text-[10px] text-muted-foreground">
+              · 来自 {accountLabel}
+            </span>
+          )}
         </div>
       </div>
-    </button>
+    </div>
   );
 }
 
