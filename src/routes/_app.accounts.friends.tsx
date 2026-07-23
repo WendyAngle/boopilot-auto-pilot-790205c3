@@ -8,7 +8,7 @@ import {
   Users,
   MessageSquareText,
   Languages,
-  RotateCcw,
+  
   Trash2,
   Sparkles,
   Info,
@@ -130,7 +130,7 @@ function FriendsPage() {
   const [approveOpen, setApproveOpen] = useState(false);
   const [rejectOpen, setRejectOpen] = useState(false);
   const [removeOpen, setRemoveOpen] = useState(false);
-  const [restoreOpen, setRestoreOpen] = useState(false);
+  
   const [noteEditOpen, setNoteEditOpen] = useState(false);
 
   const patch = (id: string, p: Partial<FriendRequest>) => {
@@ -165,6 +165,7 @@ function FriendsPage() {
 
   const reject = (publicReasonZh: string, note: string) => {
     if (!active) return;
+    const snapshot = active;
     const publicReasonText = publicReasonZh.trim()
       ? active.peerLang === "zh"
         ? publicReasonZh.trim()
@@ -179,22 +180,20 @@ function FriendsPage() {
     });
     toast.success(
       publicReasonText ? "已拒绝，说明已发送给对方" : "已拒绝好友申请",
+      {
+        duration: 5000,
+        action: {
+          label: "撤销",
+          onClick: () => {
+            setRequests((prev) =>
+              prev.map((r) => (r.id === snapshot.id ? snapshot : r)),
+            );
+            toast.success("已撤销拒绝，申请恢复为待处理");
+          },
+        },
+      },
     );
     setRejectOpen(false);
-  };
-
-
-  const restore = () => {
-    if (!active) return;
-    patch(active.id, {
-      status: "pending",
-      decidedAt: undefined,
-      publicReasonZh: undefined,
-      publicReasonText: undefined,
-      watchlisted: undefined,
-    });
-    toast.success("已恢复为待处理，可重新决策通过或拒绝");
-    setRestoreOpen(false);
   };
 
   const toggleWatchlist = () => {
