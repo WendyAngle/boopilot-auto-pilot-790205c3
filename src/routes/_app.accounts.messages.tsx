@@ -32,12 +32,17 @@ export const Route = createFileRoute("/_app/accounts/messages")({
   component: MessagesPage,
 });
 
+const GLOBAL_STARRED_ID = "__starred__";
+
 function MessagesPage() {
   const { accounts, conversations: initialConvs } = useMemo(() => getInboxData(), []);
   const [conversations, setConversations] = useState(initialConvs);
   const [activeAccountId, setActiveAccountId] = useState<string>(accounts[0]?.id ?? "");
   const [activeConvId, setActiveConvId] = useState<string>("");
   const [keyword, setKeyword] = useState("");
+  const [starredOnly, setStarredOnly] = useState(false);
+
+  const isGlobalStarred = activeAccountId === GLOBAL_STARRED_ID;
 
   // 账号维度未读汇总
   const unreadByAccount = useMemo(() => {
@@ -48,18 +53,28 @@ function MessagesPage() {
     return map;
   }, [conversations]);
 
+  const starredCount = useMemo(
+    () => conversations.filter((c) => c.starred).length,
+    [conversations],
+  );
+
   const accountConvs = useMemo(() => {
     const kw = keyword.trim().toLowerCase();
     return conversations
-      .filter((c) => c.accountId === activeAccountId)
+      .filter((c) =>
+        isGlobalStarred
+          ? c.starred
+          : c.accountId === activeAccountId && (!starredOnly || c.starred),
+      )
       .filter((c) =>
         kw
           ? c.peerName.toLowerCase().includes(kw) ||
             c.peerHandle.toLowerCase().includes(kw) ||
             c.messages.some((m) => m.text.toLowerCase().includes(kw))
           : true,
-      );
-  }, [conversations, activeAccountId, keyword]);
+      )
+      .sort((a, b) => (a.updatedAt < b.updatedAt ? 1 : -1));
+  }, [conversations, activeAccountId, keyword, starredOnly, isGlobalStarred]);
 
   // 默认选中该账号的第一条会话
   useEffect(() => {
@@ -73,7 +88,21 @@ function MessagesPage() {
   }, [accountConvs, activeConvId]);
 
   const activeConv = conversations.find((c) => c.id === activeConvId);
-  const activeAccount = accounts.find((a) => a.id === activeAccountId);
+  const activeAccount = accounts.find(
+    (a) => a.id === (activeConv?.accountId ?? activeAccountId),
+  );
+
+  const toggleStar = (convId: string) => {
+    let nextStarred = false;
+    setConversations((prev) =>
+      prev.map((c) => {
+        if (c.id !== convId) return c;
+        nextStarred = !c.starred;
+        return { ...c, starred: nextStarred };
+      }),
+    );
+    toast.success(nextStarred ? "已加入标星" : "已取消标星");
+  };
 
   const markRead = (convId: string) => {
     setConversations((prev) =>
