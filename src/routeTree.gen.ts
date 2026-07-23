@@ -40,6 +40,7 @@ import { Route as AppAgentsWorkspaceRouteImport } from './routes/_app.agents.wor
 import { Route as AppAgentsModelsRouteImport } from './routes/_app.agents.models'
 import { Route as AppAgentsListRouteImport } from './routes/_app.agents.list'
 import { Route as AppAccountsMessagesRouteImport } from './routes/_app.accounts.messages'
+import { Route as AppAccountsFriendsRouteImport } from './routes/_app.accounts.friends'
 import { Route as AppAccountsManagedIndexRouteImport } from './routes/_app.accounts.managed.index'
 import { Route as AppAccountsManagedIdRouteImport } from './routes/_app.accounts.managed.$id'
 import { Route as AppTasksTaskIdLogsIndexRouteImport } from './routes/_app.tasks.$taskId_.logs.index'
@@ -200,6 +201,11 @@ const AppAccountsMessagesRoute = AppAccountsMessagesRouteImport.update({
   path: '/accounts/messages',
   getParentRoute: () => AppRoute,
 } as any)
+const AppAccountsFriendsRoute = AppAccountsFriendsRouteImport.update({
+  id: '/accounts/friends',
+  path: '/accounts/friends',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppAccountsManagedIndexRoute = AppAccountsManagedIndexRouteImport.update({
   id: '/accounts/managed/',
   path: '/accounts/managed/',
@@ -231,6 +237,7 @@ export interface FileRoutesByFullPath {
   '/': typeof AppIndexRoute
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
+  '/accounts/friends': typeof AppAccountsFriendsRoute
   '/accounts/messages': typeof AppAccountsMessagesRoute
   '/agents/list': typeof AppAgentsListRoute
   '/agents/models': typeof AppAgentsModelsRoute
@@ -268,6 +275,7 @@ export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
   '/': typeof AppIndexRoute
+  '/accounts/friends': typeof AppAccountsFriendsRoute
   '/accounts/messages': typeof AppAccountsMessagesRoute
   '/agents/list': typeof AppAgentsListRoute
   '/agents/models': typeof AppAgentsModelsRoute
@@ -307,6 +315,7 @@ export interface FileRoutesById {
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
   '/_app/': typeof AppIndexRoute
+  '/_app/accounts/friends': typeof AppAccountsFriendsRoute
   '/_app/accounts/messages': typeof AppAccountsMessagesRoute
   '/_app/agents/list': typeof AppAgentsListRoute
   '/_app/agents/models': typeof AppAgentsModelsRoute
@@ -346,6 +355,7 @@ export interface FileRouteTypes {
     | '/'
     | '/login'
     | '/register'
+    | '/accounts/friends'
     | '/accounts/messages'
     | '/agents/list'
     | '/agents/models'
@@ -383,6 +393,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/register'
     | '/'
+    | '/accounts/friends'
     | '/accounts/messages'
     | '/agents/list'
     | '/agents/models'
@@ -421,6 +432,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/register'
     | '/_app/'
+    | '/_app/accounts/friends'
     | '/_app/accounts/messages'
     | '/_app/agents/list'
     | '/_app/agents/models'
@@ -680,6 +692,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppAccountsMessagesRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/accounts/friends': {
+      id: '/_app/accounts/friends'
+      path: '/accounts/friends'
+      fullPath: '/accounts/friends'
+      preLoaderRoute: typeof AppAccountsFriendsRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/accounts/managed/': {
       id: '/_app/accounts/managed/'
       path: '/accounts/managed'
@@ -720,6 +739,7 @@ declare module '@tanstack/react-router' {
 
 interface AppRouteChildren {
   AppIndexRoute: typeof AppIndexRoute
+  AppAccountsFriendsRoute: typeof AppAccountsFriendsRoute
   AppAccountsMessagesRoute: typeof AppAccountsMessagesRoute
   AppAgentsListRoute: typeof AppAgentsListRoute
   AppAgentsModelsRoute: typeof AppAgentsModelsRoute
@@ -756,6 +776,7 @@ interface AppRouteChildren {
 
 const AppRouteChildren: AppRouteChildren = {
   AppIndexRoute: AppIndexRoute,
+  AppAccountsFriendsRoute: AppAccountsFriendsRoute,
   AppAccountsMessagesRoute: AppAccountsMessagesRoute,
   AppAgentsListRoute: AppAgentsListRoute,
   AppAgentsModelsRoute: AppAgentsModelsRoute,
