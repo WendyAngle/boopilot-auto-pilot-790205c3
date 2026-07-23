@@ -207,7 +207,7 @@ function FriendsPage() {
   const invitePeer = () => {
     if (!active || !activeAccount) return;
     toast.success(
-      `已生成主动添加任务：将由「${activeAccount.nickname}」向「${active.peerName}」发起好友邀请`,
+      `已生成主动添加任务：将由「${activeAccount.username}」向「${active.peerName}」发起好友邀请`,
     );
   };
 
