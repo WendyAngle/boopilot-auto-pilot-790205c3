@@ -411,7 +411,7 @@ function ConversationItem({
         }
       }}
       className={cn(
-        "group flex w-full cursor-pointer items-start gap-2.5 rounded-lg px-2.5 py-2 text-left transition-colors",
+        "group mb-1 flex min-h-[76px] w-full cursor-pointer items-start gap-2.5 rounded-lg px-2.5 py-2 text-left transition-colors",
         active ? "bg-accent" : "hover:bg-accent/50",
       )}
     >
