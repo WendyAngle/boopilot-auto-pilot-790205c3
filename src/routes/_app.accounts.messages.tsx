@@ -577,6 +577,28 @@ function ChatWindow({
             {conv.peerHandle} · 通过账号「{accountName}」({accountPlatform})
           </div>
         </div>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              size="sm"
+              variant="ghost"
+              className="h-8 gap-1 px-2 text-xs"
+              onClick={onToggleStar}
+            >
+              <Star
+                className={cn(
+                  "h-4 w-4",
+                  conv.starred ? "text-amber-500" : "text-muted-foreground",
+                )}
+                fill={conv.starred ? "currentColor" : "none"}
+              />
+              {conv.starred ? "已标星" : "标星"}
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>
+            {conv.starred ? "取消对该会话的重点关注" : "加入重点关注，便于稍后跟进"}
+          </TooltipContent>
+        </Tooltip>
       </div>
 
       {/* Messages */}
