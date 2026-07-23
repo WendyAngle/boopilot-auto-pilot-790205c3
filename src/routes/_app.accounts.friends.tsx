@@ -812,6 +812,43 @@ function FriendsPage() {
   );
 }
 
+function UrgencyBadge({
+  urgency,
+}: {
+  urgency: "reapplied" | "overdue" | "watching";
+}) {
+  if (urgency === "reapplied") {
+    return (
+      <Badge
+        variant="outline"
+        className="h-4 gap-0.5 border-destructive/40 bg-destructive/10 px-1 text-[10px] font-normal text-destructive"
+      >
+        <AlertCircle className="h-2.5 w-2.5" />
+        再次申请
+      </Badge>
+    );
+  }
+  if (urgency === "overdue") {
+    return (
+      <Badge
+        variant="outline"
+        className="h-4 gap-0.5 border-warning/40 bg-warning/10 px-1 text-[10px] font-normal text-warning"
+      >
+        <Clock className="h-2.5 w-2.5" />
+        建议跟进
+      </Badge>
+    );
+  }
+  return (
+    <Badge
+      variant="outline"
+      className="h-4 gap-0.5 px-1 text-[10px] font-normal text-muted-foreground"
+    >
+      关注中
+    </Badge>
+  );
+}
+
 function StatusBadge({ status }: { status: FriendStatus }) {
   if (status === "pending")
     return (
