@@ -399,6 +399,7 @@ function ConversationItem({
     last.direction === "in"
       ? last.translation ?? last.text
       : last.sourceZh ?? last.text;
+  const displayTime = conv.updatedAt.slice(0, 16);
   return (
     <div
       onClick={onClick}
@@ -411,30 +412,23 @@ function ConversationItem({
         }
       }}
       className={cn(
-        "group mb-1 flex min-h-[76px] w-full cursor-pointer items-start gap-2.5 rounded-lg px-2.5 py-2 text-left transition-colors",
+        "group mb-1 grid h-[84px] w-full cursor-pointer grid-cols-[36px_minmax(0,1fr)_96px] items-start gap-2 rounded-lg px-2.5 py-2 text-left transition-colors",
         active ? "bg-accent" : "hover:bg-accent/50",
       )}
     >
       <img src={conv.peerAvatar} alt="" className="h-9 w-9 shrink-0 rounded-full bg-muted" />
-      <div className="min-w-0 flex-1">
-        <div className="flex items-center justify-between gap-2">
-          <span className="min-w-0 flex-1 truncate text-sm font-medium" title={conv.peerName}>{conv.peerName}</span>
-          <span className="shrink-0 whitespace-nowrap tabular-nums text-[10px] leading-4 text-muted-foreground" title={conv.updatedAt}>
-            {conv.updatedAt.slice(0, 16)}
-          </span>
-        </div>
-        <div className="mt-0.5 flex items-center gap-1.5">
-          <p className="min-w-0 flex-1 truncate text-xs text-muted-foreground" title={`${last.direction === "out" ? "我: " : ""}${preview}`}>
-            {last.direction === "out" ? "我: " : ""}
-            {preview}
-          </p>
-          {conv.unread > 0 && (
-            <Badge className="h-4 min-w-[16px] shrink-0 justify-center rounded-full bg-destructive px-1 text-[10px] text-destructive-foreground">
-              {conv.unread}
-            </Badge>
-          )}
-        </div>
-        <div className="mt-1 flex min-h-5 items-center gap-1">
+      <div className="min-w-0 overflow-hidden">
+        <span className="block truncate text-sm font-medium leading-5" title={conv.peerName}>
+          {conv.peerName}
+        </span>
+        <p
+          className="mt-0.5 truncate text-xs leading-4 text-muted-foreground"
+          title={`${last.direction === "out" ? "我: " : ""}${preview}`}
+        >
+          {last.direction === "out" ? "我: " : ""}
+          {preview}
+        </p>
+        <div className="mt-1 flex min-h-5 min-w-0 items-center gap-1 overflow-hidden">
           <Badge variant="outline" className="h-4 shrink-0 rounded px-1 text-[9px] font-normal">
             {LANG_LABEL[conv.peerLang]}
           </Badge>
@@ -457,6 +451,23 @@ function ConversationItem({
               · 来自 {accountLabel}
             </span>
           )}
+        </div>
+      </div>
+      <div className="flex h-full min-w-0 flex-col items-start justify-between overflow-visible pl-1">
+        <span
+          className="block w-[92px] whitespace-nowrap text-left font-mono text-[10px] leading-4 text-muted-foreground"
+          title={displayTime}
+        >
+          {displayTime}
+        </span>
+        <div className="flex w-[92px] items-center justify-between gap-1">
+          {conv.unread > 0 ? (
+            <Badge className="h-4 min-w-[16px] shrink-0 justify-center rounded-full bg-destructive px-1 text-[10px] text-destructive-foreground">
+              {conv.unread}
+            </Badge>
+          ) : (
+            <span aria-hidden="true" className="h-4 min-w-[16px]" />
+          )}
           <button
             type="button"
             onClick={(e) => {
@@ -465,7 +476,7 @@ function ConversationItem({
             }}
             aria-label={conv.starred ? "取消标星" : "加入标星"}
             className={cn(
-              "ml-auto flex h-5 w-5 shrink-0 items-center justify-center rounded transition-colors",
+              "flex h-5 w-5 shrink-0 items-center justify-center rounded transition-colors",
               conv.starred
                 ? "text-amber-500"
                 : "text-muted-foreground/40 opacity-0 hover:text-amber-500 group-hover:opacity-100",
