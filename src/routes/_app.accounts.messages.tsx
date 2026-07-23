@@ -434,7 +434,7 @@ function ConversationItem({
             </Badge>
           )}
         </div>
-        <div className="mt-1 flex items-center gap-1">
+        <div className="mt-1 flex min-h-5 items-center gap-1">
           <Badge variant="outline" className="h-4 shrink-0 rounded px-1 text-[9px] font-normal">
             {LANG_LABEL[conv.peerLang]}
           </Badge>
