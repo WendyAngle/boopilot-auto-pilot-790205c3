@@ -371,6 +371,9 @@ function ConversationItem({
   accountLabel?: string;
 }) {
   const last = conv.messages[conv.messages.length - 1];
+  const failedCount = conv.messages.filter(
+    (m) => m.direction === "out" && m.status === "failed",
+  ).length;
   const preview =
     last.direction === "in"
       ? last.translation ?? last.text
