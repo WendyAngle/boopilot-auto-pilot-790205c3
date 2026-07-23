@@ -490,11 +490,30 @@ function FriendsPage() {
                     </>
                   )}
 
-                  {/* 已拒绝：拒绝时间 + 对外说明 */}
+                  {/* 已拒绝：平台事实说明 + 拒绝时间 + 对外说明 */}
                   {active.status === "rejected" && (
                     <>
+                      <div className="flex items-start gap-2 rounded-md border border-amber-200 bg-amber-50 p-3 text-xs text-amber-900 dark:border-amber-900/40 dark:bg-amber-950/30 dark:text-amber-200">
+                        <Info className="mt-0.5 h-3.5 w-3.5 flex-none" />
+                        <div className="space-y-1 leading-relaxed">
+                          <div className="font-medium">
+                            关于「已拒绝」的平台事实
+                          </div>
+                          <div>
+                            {activeAccount?.platform === "linkedin"
+                              ? "LinkedIn 拒绝后对方 6 个月内无法再次发送邀请。若需重新建立联系，建议由本账号主动发起邀请。"
+                              : "多数平台拒绝后原申请即失效、不可复活。此处「恢复为待处理」仅回滚本工作台的决策记录，不会让对方那侧重新看到申请。若需重新建立好友关系，请使用下方「主动添加」或等待对方再次申请。"}
+                          </div>
+                        </div>
+                      </div>
                       {active.decidedAt && (
                         <MetaLine label="拒绝时间" value={active.decidedAt} />
+                      )}
+                      {active.watchlisted && (
+                        <div className="flex items-center gap-1.5 text-xs text-primary">
+                          <BellRing className="h-3.5 w-3.5" />
+                          已加入持续关注，对方再次申请将高亮提醒
+                        </div>
                       )}
                       {active.publicReasonZh && (
                         <div className="rounded-md border p-3">
