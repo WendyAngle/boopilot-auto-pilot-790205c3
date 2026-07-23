@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState, useEffect, useRef } from "react";
-import { Search, Send, Sparkles, Eraser, Languages, Loader2, CheckCheck, MessageSquare, AlertCircle, RotateCw } from "lucide-react";
+import { Search, Send, Sparkles, Eraser, Languages, Loader2, CheckCheck, MessageSquare, AlertCircle, RotateCw, Star } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -32,12 +32,17 @@ export const Route = createFileRoute("/_app/accounts/messages")({
   component: MessagesPage,
 });
 
+const GLOBAL_STARRED_ID = "__starred__";
+
 function MessagesPage() {
   const { accounts, conversations: initialConvs } = useMemo(() => getInboxData(), []);
   const [conversations, setConversations] = useState(initialConvs);
   const [activeAccountId, setActiveAccountId] = useState<string>(accounts[0]?.id ?? "");
   const [activeConvId, setActiveConvId] = useState<string>("");
   const [keyword, setKeyword] = useState("");
+  const [starredOnly, setStarredOnly] = useState(false);
+
+  const isGlobalStarred = activeAccountId === GLOBAL_STARRED_ID;
 
   // 账号维度未读汇总
   const unreadByAccount = useMemo(() => {
@@ -48,18 +53,28 @@ function MessagesPage() {
     return map;
   }, [conversations]);
 
+  const starredCount = useMemo(
+    () => conversations.filter((c) => c.starred).length,
+    [conversations],
+  );
+
   const accountConvs = useMemo(() => {
     const kw = keyword.trim().toLowerCase();
     return conversations
-      .filter((c) => c.accountId === activeAccountId)
+      .filter((c) =>
+        isGlobalStarred
+          ? c.starred
+          : c.accountId === activeAccountId && (!starredOnly || c.starred),
+      )
       .filter((c) =>
         kw
           ? c.peerName.toLowerCase().includes(kw) ||
             c.peerHandle.toLowerCase().includes(kw) ||
             c.messages.some((m) => m.text.toLowerCase().includes(kw))
           : true,
-      );
-  }, [conversations, activeAccountId, keyword]);
+      )
+      .sort((a, b) => (a.updatedAt < b.updatedAt ? 1 : -1));
+  }, [conversations, activeAccountId, keyword, starredOnly, isGlobalStarred]);
 
   // 默认选中该账号的第一条会话
   useEffect(() => {
@@ -73,7 +88,21 @@ function MessagesPage() {
   }, [accountConvs, activeConvId]);
 
   const activeConv = conversations.find((c) => c.id === activeConvId);
-  const activeAccount = accounts.find((a) => a.id === activeAccountId);
+  const activeAccount = accounts.find(
+    (a) => a.id === (activeConv?.accountId ?? activeAccountId),
+  );
+
+  const toggleStar = (convId: string) => {
+    let nextStarred = false;
+    setConversations((prev) =>
+      prev.map((c) => {
+        if (c.id !== convId) return c;
+        nextStarred = !c.starred;
+        return { ...c, starred: nextStarred };
+      }),
+    );
+    toast.success(nextStarred ? "已加入标星" : "已取消标星");
+  };
 
   const markRead = (convId: string) => {
     setConversations((prev) =>
@@ -197,13 +226,41 @@ function MessagesPage() {
                     暂无账号
                   </div>
                 )}
+                {/* 全部标星（跨账号聚合视图） */}
+                {accounts.length > 0 && (
+                  <>
+                    <div className="my-1 border-t" />
+                    <button
+                      onClick={() => setActiveAccountId(GLOBAL_STARRED_ID)}
+                      className={cn(
+                        "flex w-full items-center gap-2 rounded-lg px-2 py-2 text-left text-sm transition-colors",
+                        isGlobalStarred ? "bg-accent" : "hover:bg-accent/50",
+                      )}
+                    >
+                      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-amber-100 text-amber-600 dark:bg-amber-950/40 dark:text-amber-300">
+                        <Star className="h-4 w-4" fill="currentColor" />
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <div className="truncate text-sm font-medium">全部标星</div>
+                        <div className="truncate text-xs text-muted-foreground">
+                          跨账号聚合
+                        </div>
+                      </div>
+                      {starredCount > 0 && (
+                        <Badge className="h-5 min-w-[20px] justify-center rounded-full bg-amber-500/90 px-1.5 text-[10px] text-white hover:bg-amber-500/90">
+                          {starredCount}
+                        </Badge>
+                      )}
+                    </button>
+                  </>
+                )}
               </div>
             </ScrollArea>
           </div>
 
           {/* Column 2: Conversations */}
           <div className="flex min-h-0 flex-col border-r">
-            <div className="border-b p-2.5">
+            <div className="border-b p-2.5 space-y-2">
               <div className="relative">
                 <Search className="absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
                 <Input
@@ -213,21 +270,62 @@ function MessagesPage() {
                   className="h-8 pl-8 text-sm"
                 />
               </div>
+              {isGlobalStarred ? (
+                <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                  <Star className="h-3 w-3 text-amber-500" fill="currentColor" />
+                  全部标星会话（{accountConvs.length}）
+                </div>
+              ) : (
+                <div className="flex items-center justify-between text-xs">
+                  <span className="text-muted-foreground">
+                    {accountConvs.length} 个会话
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => setStarredOnly((v) => !v)}
+                    className={cn(
+                      "flex items-center gap-1 rounded-full border px-2 py-0.5 transition-colors",
+                      starredOnly
+                        ? "border-amber-300 bg-amber-50 text-amber-700 dark:border-amber-800 dark:bg-amber-950/40 dark:text-amber-300"
+                        : "border-transparent text-muted-foreground hover:bg-accent",
+                    )}
+                  >
+                    <Star
+                      className="h-3 w-3"
+                      fill={starredOnly ? "currentColor" : "none"}
+                    />
+                    仅看标星
+                  </button>
+                </div>
+              )}
             </div>
             <ScrollArea className="flex-1">
               <div className="p-1.5">
-                {accountConvs.map((c) => (
-                  <ConversationItem
-                    key={c.id}
-                    conv={c}
-                    active={c.id === activeConvId}
-                    onClick={() => setActiveConvId(c.id)}
-                  />
-                ))}
+                {accountConvs.map((c) => {
+                  const acc = accounts.find((a) => a.id === c.accountId);
+                  return (
+                    <ConversationItem
+                      key={c.id}
+                      conv={c}
+                      active={c.id === activeConvId}
+                      onClick={() => setActiveConvId(c.id)}
+                      onToggleStar={() => toggleStar(c.id)}
+                      accountLabel={
+                        isGlobalStarred && acc
+                          ? `${acc.username} · ${acc.platform}`
+                          : undefined
+                      }
+                    />
+                  );
+                })}
                 {accountConvs.length === 0 && (
                   <div className="flex flex-col items-center gap-2 px-2 py-10 text-center text-xs text-muted-foreground">
                     <MessageSquare className="h-6 w-6 opacity-50" />
-                    暂无私信会话
+                    {isGlobalStarred
+                      ? "暂无标星会话，点击会话卡片右上角的星标可加入"
+                      : starredOnly
+                        ? "该账号下暂无标星会话"
+                        : "暂无私信会话"}
                   </div>
                 )}
               </div>
@@ -244,6 +342,7 @@ function MessagesPage() {
                 accountPlatform={activeAccount.platform}
                 onSend={handleSend}
                 onPatch={(msgId, patch) => patchMessage(activeConv.id, msgId, patch)}
+                onToggleStar={() => toggleStar(activeConv.id)}
               />
             ) : (
               <div className="flex flex-1 flex-col items-center justify-center gap-3 text-sm text-muted-foreground">
@@ -262,10 +361,14 @@ function ConversationItem({
   conv,
   active,
   onClick,
+  onToggleStar,
+  accountLabel,
 }: {
   conv: Conversation;
   active: boolean;
   onClick: () => void;
+  onToggleStar: () => void;
+  accountLabel?: string;
 }) {
   const last = conv.messages[conv.messages.length - 1];
   const preview =
@@ -273,20 +376,51 @@ function ConversationItem({
       ? last.translation ?? last.text
       : last.sourceZh ?? last.text;
   return (
-    <button
+    <div
       onClick={onClick}
+      role="button"
+      tabIndex={0}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          onClick();
+        }
+      }}
       className={cn(
-        "flex w-full items-start gap-2.5 rounded-lg px-2.5 py-2 text-left transition-colors",
+        "group flex w-full cursor-pointer items-start gap-2.5 rounded-lg px-2.5 py-2 text-left transition-colors",
         active ? "bg-accent" : "hover:bg-accent/50",
       )}
     >
       <img src={conv.peerAvatar} alt="" className="h-9 w-9 shrink-0 rounded-full bg-muted" />
       <div className="min-w-0 flex-1">
         <div className="flex items-center justify-between gap-2">
-          <span className="truncate text-sm font-medium">{conv.peerName}</span>
-          <span className="shrink-0 text-[10px] text-muted-foreground">
-            {conv.updatedAt.slice(5, 16)}
-          </span>
+          <div className="flex min-w-0 items-center gap-1">
+            <span className="truncate text-sm font-medium">{conv.peerName}</span>
+          </div>
+          <div className="flex shrink-0 items-center gap-1">
+            <span className="text-[10px] text-muted-foreground">
+              {conv.updatedAt.slice(5, 16)}
+            </span>
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                onToggleStar();
+              }}
+              aria-label={conv.starred ? "取消标星" : "加入标星"}
+              className={cn(
+                "flex h-5 w-5 items-center justify-center rounded transition-colors",
+                conv.starred
+                  ? "text-amber-500"
+                  : "text-muted-foreground/40 opacity-0 hover:text-amber-500 group-hover:opacity-100",
+              )}
+            >
+              <Star
+                className="h-3.5 w-3.5"
+                fill={conv.starred ? "currentColor" : "none"}
+              />
+            </button>
+          </div>
         </div>
         <div className="flex items-center gap-1.5">
           <p className="min-w-0 flex-1 truncate text-xs text-muted-foreground">
@@ -303,9 +437,19 @@ function ConversationItem({
           <Badge variant="outline" className="h-4 rounded px-1 text-[9px] font-normal">
             {LANG_LABEL[conv.peerLang]}
           </Badge>
+          {conv.starred && conv.starredNote && (
+            <span className="truncate text-[10px] text-amber-600 dark:text-amber-400">
+              · {conv.starredNote}
+            </span>
+          )}
+          {accountLabel && (
+            <span className="truncate text-[10px] text-muted-foreground">
+              · 来自 {accountLabel}
+            </span>
+          )}
         </div>
       </div>
-    </button>
+    </div>
   );
 }
 
@@ -315,12 +459,14 @@ function ChatWindow({
   accountPlatform,
   onSend,
   onPatch,
+  onToggleStar,
 }: {
   conv: Conversation;
   accountName: string;
   accountPlatform: string;
   onSend: (msg: DirectMessage) => void;
   onPatch: (msgId: string, patch: Partial<DirectMessage>) => void;
+  onToggleStar: () => void;
 }) {
   const [draftZh, setDraftZh] = useState("");
   const [translated, setTranslated] = useState("");
@@ -431,6 +577,28 @@ function ChatWindow({
             {conv.peerHandle} · 通过账号「{accountName}」({accountPlatform})
           </div>
         </div>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              size="sm"
+              variant="ghost"
+              className="h-8 gap-1 px-2 text-xs"
+              onClick={onToggleStar}
+            >
+              <Star
+                className={cn(
+                  "h-4 w-4",
+                  conv.starred ? "text-amber-500" : "text-muted-foreground",
+                )}
+                fill={conv.starred ? "currentColor" : "none"}
+              />
+              {conv.starred ? "已标星" : "标星"}
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>
+            {conv.starred ? "取消对该会话的重点关注" : "加入重点关注，便于稍后跟进"}
+          </TooltipContent>
+        </Tooltip>
       </div>
 
       {/* Messages */}
