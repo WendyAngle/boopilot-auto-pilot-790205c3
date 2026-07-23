@@ -585,6 +585,7 @@ function FriendsPage() {
           <RejectDialog
             open={rejectOpen}
             onOpenChange={setRejectOpen}
+            request={active}
             onConfirm={reject}
           />
           <NoteEditDialog
