@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState, useEffect, useRef } from "react";
-import { Search, Send, Sparkles, Eraser, Languages, Loader2, CheckCheck, MessageSquare } from "lucide-react";
+import { Search, Send, Sparkles, Eraser, Languages, Loader2, CheckCheck, MessageSquare, AlertCircle, RotateCw } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -104,6 +104,16 @@ function MessagesPage() {
               messages: [...c.messages, msg],
               updatedAt: msg.time,
             }
+          : c,
+      ),
+    );
+  };
+
+  const patchMessage = (convId: string, msgId: string, patch: Partial<DirectMessage>) => {
+    setConversations((prev) =>
+      prev.map((c) =>
+        c.id === convId
+          ? { ...c, messages: c.messages.map((m) => (m.id === msgId ? { ...m, ...patch } : m)) }
           : c,
       ),
     );
@@ -233,6 +243,7 @@ function MessagesPage() {
                 accountName={activeAccount.username}
                 accountPlatform={activeAccount.platform}
                 onSend={handleSend}
+                onPatch={(msgId, patch) => patchMessage(activeConv.id, msgId, patch)}
               />
             ) : (
               <div className="flex flex-1 flex-col items-center justify-center gap-3 text-sm text-muted-foreground">
@@ -303,11 +314,13 @@ function ChatWindow({
   accountName,
   accountPlatform,
   onSend,
+  onPatch,
 }: {
   conv: Conversation;
   accountName: string;
   accountPlatform: string;
   onSend: (msg: DirectMessage) => void;
+  onPatch: (msgId: string, patch: Partial<DirectMessage>) => void;
 }) {
   const [draftZh, setDraftZh] = useState("");
   const [translated, setTranslated] = useState("");
@@ -362,6 +375,25 @@ function ChatWindow({
     setAiOptions([]);
   };
 
+  const simulateSend = (msgId: string) => {
+    // 模拟发送：约 15% 概率失败，用于覆盖失败态
+    const delay = 900 + Math.random() * 800;
+    setTimeout(() => {
+      const failed = Math.random() < 0.15;
+      if (failed) {
+        onPatch(msgId, { status: "failed", failReason: "网络异常，消息未送达" });
+        toast.error("发送失败，可点击重试");
+      } else {
+        onPatch(msgId, { status: "sent" });
+      }
+    }, delay);
+  };
+
+  const handleRetry = (msg: DirectMessage) => {
+    onPatch(msg.id, { status: "sending", failReason: undefined });
+    simulateSend(msg.id);
+  };
+
   const handleSend = () => {
     const zh = draftZh.trim();
     if (!zh) return;
@@ -369,16 +401,18 @@ function ChatWindow({
     const now = new Date();
     const pad = (n: number) => String(n).padStart(2, "0");
     const time = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}`;
+    const msgId = `${conv.id}-out-${Date.now()}`;
     onSend({
-      id: `${conv.id}-out-${Date.now()}`,
+      id: msgId,
       direction: "out",
       lang: conv.peerLang,
       text: finalText,
       sourceZh: zh,
       time,
+      status: "sending",
     });
-    toast.success("已发送");
     handleClear();
+    simulateSend(msgId);
   };
 
   return (
@@ -403,7 +437,7 @@ function ChatWindow({
       <ScrollArea className="flex-1">
         <div ref={scrollRef} className="space-y-4 px-4 py-4">
           {conv.messages.map((m) => (
-            <MessageBubble key={m.id} msg={m} peerName={conv.peerName} />
+            <MessageBubble key={m.id} msg={m} peerName={conv.peerName} onRetry={handleRetry} />
           ))}
         </div>
       </ScrollArea>
@@ -520,8 +554,19 @@ function ChatWindow({
   );
 }
 
-function MessageBubble({ msg, peerName }: { msg: DirectMessage; peerName: string }) {
+function MessageBubble({
+  msg,
+  peerName,
+  onRetry,
+}: {
+  msg: DirectMessage;
+  peerName: string;
+  onRetry: (msg: DirectMessage) => void;
+}) {
   const isOut = msg.direction === "out";
+  const status = msg.status;
+  const isSending = isOut && status === "sending";
+  const isFailed = isOut && status === "failed";
   return (
     <div className={cn("flex gap-2", isOut ? "flex-row-reverse" : "flex-row")}>
       <div
@@ -533,22 +578,45 @@ function MessageBubble({ msg, peerName }: { msg: DirectMessage; peerName: string
         {isOut ? "我" : peerName.slice(0, 1)}
       </div>
       <div className={cn("max-w-[75%] space-y-1", isOut && "items-end text-right")}>
-        <div
-          className={cn(
-            "rounded-2xl px-3 py-2 text-sm leading-relaxed shadow-sm",
-            isOut
-              ? "rounded-tr-sm bg-primary text-primary-foreground"
-              : "rounded-tl-sm bg-card border",
+        <div className={cn("flex items-center gap-1.5", isOut && "flex-row-reverse")}>
+          <div
+            className={cn(
+              "rounded-2xl px-3 py-2 text-sm leading-relaxed shadow-sm",
+              isOut
+                ? "rounded-tr-sm bg-primary text-primary-foreground"
+                : "rounded-tl-sm bg-card border",
+              isSending && "opacity-70",
+              isFailed && "opacity-90 ring-1 ring-destructive/40",
+            )}
+          >
+            {msg.text}
+          </div>
+          {isSending && (
+            <Loader2 className="h-3.5 w-3.5 shrink-0 animate-spin text-muted-foreground" />
           )}
-        >
-          {msg.text}
+          {isFailed && (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button
+                  onClick={() => onRetry(msg)}
+                  className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-destructive/10 text-destructive transition-colors hover:bg-destructive/20"
+                  aria-label="重新发送"
+                >
+                  <AlertCircle className="h-3.5 w-3.5" />
+                </button>
+              </TooltipTrigger>
+              <TooltipContent>
+                {msg.failReason ?? "发送失败"} · 点击重试
+              </TooltipContent>
+            </Tooltip>
+          )}
         </div>
         {/* 翻译 */}
         {!isOut && msg.translation && (
           <div className="rounded-lg border border-dashed bg-muted/40 px-2.5 py-1.5 text-xs text-muted-foreground">
             <div className="mb-0.5 flex items-center gap-1 text-[10px]">
               <Languages className="h-3 w-3" />
-              译文（中文）
+              译文(中文)
             </div>
             <div>{msg.translation}</div>
           </div>
@@ -557,7 +625,7 @@ function MessageBubble({ msg, peerName }: { msg: DirectMessage; peerName: string
           <div className="rounded-lg border border-dashed bg-muted/40 px-2.5 py-1.5 text-xs text-muted-foreground">
             <div className="mb-0.5 flex items-center gap-1 text-[10px]">
               <Languages className="h-3 w-3" />
-              原文（中文）
+              原文(中文)
             </div>
             <div>{msg.sourceZh}</div>
           </div>
@@ -571,7 +639,29 @@ function MessageBubble({ msg, peerName }: { msg: DirectMessage; peerName: string
           <span>{msg.time.slice(5)}</span>
           <Separator orientation="vertical" className="h-3" />
           <span>{LANG_LABEL[msg.lang]}</span>
-          {isOut && <CheckCheck className="h-3 w-3" />}
+          {isOut && status === "sending" && (
+            <span className="flex items-center gap-0.5 text-muted-foreground">
+              <Loader2 className="h-3 w-3 animate-spin" />
+              发送中
+            </span>
+          )}
+          {isOut && status === "sent" && (
+            <span className="flex items-center gap-0.5 text-emerald-600 dark:text-emerald-400">
+              <CheckCheck className="h-3 w-3" />
+              已送达
+            </span>
+          )}
+          {isOut && status === "failed" && (
+            <button
+              onClick={() => onRetry(msg)}
+              className="flex items-center gap-0.5 text-destructive hover:underline"
+            >
+              <AlertCircle className="h-3 w-3" />
+              发送失败，重试
+              <RotateCw className="h-3 w-3" />
+            </button>
+          )}
+          {isOut && !status && <CheckCheck className="h-3 w-3" />}
         </div>
       </div>
     </div>
