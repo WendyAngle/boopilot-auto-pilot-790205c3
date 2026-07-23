@@ -56,6 +56,10 @@ export interface FriendRequest {
   welcomeText?: string;
   /** 内部备注（通过/拒绝均可填） */
   note?: string;
+  /** 拒绝时对外说明（中文原文，展示给对方） */
+  publicReasonZh?: string;
+  /** 拒绝时对外说明（对方语种译文） */
+  publicReasonText?: string;
 }
 
 const PEER_POOL: Array<{
