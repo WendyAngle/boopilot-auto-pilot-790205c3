@@ -591,15 +591,43 @@ function FriendsPage() {
                   </Button>
                 )}
                 {active.status === "rejected" && (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setRestoreOpen(true)}
-                    className="gap-1.5"
-                  >
-                    <RotateCcw className="h-3.5 w-3.5" />
-                    恢复为待处理
-                  </Button>
+                  <>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={toggleWatchlist}
+                      className="gap-1.5"
+                    >
+                      {active.watchlisted ? (
+                        <>
+                          <BellRing className="h-3.5 w-3.5 text-primary" />
+                          取消关注
+                        </>
+                      ) : (
+                        <>
+                          <Bell className="h-3.5 w-3.5" />
+                          标记持续关注
+                        </>
+                      )}
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setRestoreOpen(true)}
+                      className="gap-1.5"
+                    >
+                      <RotateCcw className="h-3.5 w-3.5" />
+                      恢复为待处理
+                    </Button>
+                    <Button
+                      size="sm"
+                      onClick={invitePeer}
+                      className="gap-1.5"
+                    >
+                      <UserPlus className="h-3.5 w-3.5" />
+                      主动向 TA 发起邀请
+                    </Button>
+                  </>
                 )}
               </div>
             </>
