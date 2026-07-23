@@ -160,16 +160,26 @@ function FriendsPage() {
     setApproveOpen(false);
   };
 
-  const reject = (note: string) => {
+  const reject = (publicReasonZh: string, note: string) => {
     if (!active) return;
+    const publicReasonText = publicReasonZh.trim()
+      ? active.peerLang === "zh"
+        ? publicReasonZh.trim()
+        : translateZhTo(active.peerLang, publicReasonZh.trim())
+      : undefined;
     patch(active.id, {
       status: "rejected",
       decidedAt: now(),
+      publicReasonZh: publicReasonZh.trim() || undefined,
+      publicReasonText,
       note: note.trim() || undefined,
     });
-    toast.success("已拒绝好友申请");
+    toast.success(
+      publicReasonText ? "已拒绝，说明已发送给对方" : "已拒绝好友申请",
+    );
     setRejectOpen(false);
   };
+
 
   const restore = () => {
     if (!active) return;
