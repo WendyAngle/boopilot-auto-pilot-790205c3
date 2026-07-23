@@ -274,6 +274,19 @@ function buildAll(): { accounts: ManagedAccount[]; conversations: Conversation[]
 
       const lastMsg = msgs[msgs.length - 1];
       const unread = msgs.filter((m) => m.direction === "in" && !m.read).length;
+      // Seed starred：每个账号的第 0 条会话默认标星；每 3 个账号的第 2 条也标星，覆盖跨账号场景
+      const starred = c === 0 || (aIdx % 3 === 0 && c === 2);
+      const starredNote = starred
+        ? c === 0
+          ? seed.topic === "shop"
+            ? "客户咨询下单，等回复"
+            : seed.topic === "collab"
+              ? "合作意向，待发资料"
+              : seed.topic === "support"
+                ? "售后跟进中"
+                : "重点客户"
+          : undefined
+        : undefined;
       conversations.push({
         id: convId,
         accountId: acc.id,
@@ -286,6 +299,8 @@ function buildAll(): { accounts: ManagedAccount[]; conversations: Conversation[]
         unread,
         updatedAt: lastMsg.time,
         messages: msgs,
+        starred,
+        starredNote,
       });
     }
   });
