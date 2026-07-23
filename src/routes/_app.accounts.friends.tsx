@@ -467,9 +467,27 @@ function FriendsPage() {
                     </>
                   )}
 
-                  {/* 已拒绝：拒绝时间 */}
-                  {active.status === "rejected" && active.decidedAt && (
-                    <MetaLine label="拒绝时间" value={active.decidedAt} />
+                  {/* 已拒绝：拒绝时间 + 对外说明 */}
+                  {active.status === "rejected" && (
+                    <>
+                      {active.decidedAt && (
+                        <MetaLine label="拒绝时间" value={active.decidedAt} />
+                      )}
+                      {active.publicReasonZh && (
+                        <div className="rounded-md border p-3">
+                          <div className="mb-1.5 text-[11px] font-medium text-muted-foreground">
+                            拒绝时对外发送的说明
+                          </div>
+                          <div className="text-sm">{active.publicReasonZh}</div>
+                          {active.publicReasonText &&
+                            active.publicReasonText !== active.publicReasonZh && (
+                              <div className="mt-1 text-xs text-muted-foreground">
+                                → {active.publicReasonText}
+                              </div>
+                            )}
+                        </div>
+                      )}
+                    </>
                   )}
 
                   {/* 内部备注 */}
