@@ -881,7 +881,7 @@ function MessageBubble({
             isOut && "justify-end",
           )}
         >
-          <span>{msg.time.slice(5)}</span>
+          <span title={msg.time}>{msg.time}</span>
           <Separator orientation="vertical" className="h-3" />
           <span>{LANG_LABEL[msg.lang]}</span>
           {isOut && status === "sending" && (
