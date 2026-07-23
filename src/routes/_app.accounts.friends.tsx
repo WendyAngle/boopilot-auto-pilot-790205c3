@@ -77,7 +77,7 @@ function FriendsPage() {
   const { accounts, requests: initial } = useMemo(() => getFriendData(), []);
   const [requests, setRequests] = useState<FriendRequest[]>(initial);
   const [activeAccountId, setActiveAccountId] = useState(accounts[0]?.id ?? "");
-  const [tab, setTab] = useState<FriendStatus>("pending");
+  const [tab, setTab] = useState<TabKey>("pending");
   const [activeId, setActiveId] = useState<string>("");
   const [keyword, setKeyword] = useState("");
 
@@ -92,28 +92,90 @@ function FriendsPage() {
     return map;
   }, [requests]);
 
+  // 「再次申请」映射：key = accountId::peerHandle
+  // 只有当同一账号下，该 peer 既有 pending 又有 rejected+watchlisted 时才算「再次申请」
+  const reappMap = useMemo(() => {
+    const pendingKeys = new Set(
+      requests
+        .filter((r) => r.status === "pending")
+        .map((r) => `${r.accountId}::${r.peerHandle}`),
+    );
+    const map = new Map<string, FriendRequest>(); // key -> pending 申请
+    requests.forEach((r) => {
+      const k = `${r.accountId}::${r.peerHandle}`;
+      if (r.status === "pending" && pendingKeys.has(k)) {
+        map.set(k, r);
+      }
+    });
+    // 仅保留同时存在 watchlisted rejected 的
+    const result = new Map<string, FriendRequest>();
+    requests.forEach((r) => {
+      if (r.status === "rejected" && r.watchlisted) {
+        const k = `${r.accountId}::${r.peerHandle}`;
+        const p = map.get(k);
+        if (p) result.set(k, p);
+      }
+    });
+    return result;
+  }, [requests]);
+
+  // 全局再次申请数量（用于顶部横幅）
+  const reappGlobal = reappMap.size;
+
   const countsForActive = useMemo(() => {
-    const c = { pending: 0, accepted: 0, rejected: 0 };
+    const c = { pending: 0, accepted: 0, rejected: 0, watchlist: 0 };
     requests
       .filter((r) => r.accountId === activeAccountId)
       .forEach((r) => {
         c[r.status]++;
+        if (r.status === "rejected" && r.watchlisted) c.watchlist++;
       });
     return c;
   }, [requests, activeAccountId]);
 
+  // 计算某条 rejected+watchlisted 的紧迫度
+  const urgencyOf = (r: FriendRequest): "reapplied" | "overdue" | "watching" => {
+    const k = `${r.accountId}::${r.peerHandle}`;
+    if (reappMap.has(k)) return "reapplied";
+    const days = daysSince(r.decidedAt ?? r.requestedAt);
+    if (days > 30) return "overdue";
+    return "watching";
+  };
+
   const listItems = useMemo(() => {
     const kw = keyword.trim().toLowerCase();
+    const matchKw = (r: FriendRequest) =>
+      kw
+        ? r.peerName.toLowerCase().includes(kw) ||
+          r.peerHandle.toLowerCase().includes(kw) ||
+          (r.requestText ?? "").toLowerCase().includes(kw)
+        : true;
+    if (tab === "watchlist") {
+      const order: Record<"reapplied" | "overdue" | "watching", number> = {
+        reapplied: 0,
+        overdue: 1,
+        watching: 2,
+      };
+      return requests
+        .filter(
+          (r) =>
+            r.accountId === activeAccountId &&
+            r.status === "rejected" &&
+            r.watchlisted,
+        )
+        .filter(matchKw)
+        .sort((a, b) => {
+          const ua = urgencyOf(a);
+          const ub = urgencyOf(b);
+          if (ua !== ub) return order[ua] - order[ub];
+          return (b.decidedAt ?? "").localeCompare(a.decidedAt ?? "");
+        });
+    }
     return requests
       .filter((r) => r.accountId === activeAccountId && r.status === tab)
-      .filter((r) =>
-        kw
-          ? r.peerName.toLowerCase().includes(kw) ||
-            r.peerHandle.toLowerCase().includes(kw) ||
-            (r.requestText ?? "").toLowerCase().includes(kw)
-          : true,
-      );
-  }, [requests, activeAccountId, tab, keyword]);
+      .filter(matchKw);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [requests, activeAccountId, tab, keyword, reappMap]);
 
   useEffect(() => {
     if (!listItems.length) {
