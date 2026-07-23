@@ -360,10 +360,10 @@ function FriendsPage() {
                       </span>
                     </div>
                     <div className="min-w-0 flex-1">
-                      <div className="truncate text-sm font-medium">
+                      <div className="truncate text-sm font-medium" title={a.username}>
                         {a.username}
                       </div>
-                      <div className="truncate text-xs text-muted-foreground">
+                      <div className="truncate text-xs text-muted-foreground" title={a.platformId}>
                         {a.platformId}
                       </div>
                     </div>
