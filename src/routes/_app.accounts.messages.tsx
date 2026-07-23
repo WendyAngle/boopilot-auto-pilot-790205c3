@@ -375,6 +375,25 @@ function ChatWindow({
     setAiOptions([]);
   };
 
+  const simulateSend = (msgId: string) => {
+    // 模拟发送：约 15% 概率失败，用于覆盖失败态
+    const delay = 900 + Math.random() * 800;
+    setTimeout(() => {
+      const failed = Math.random() < 0.15;
+      if (failed) {
+        onPatch(msgId, { status: "failed", failReason: "网络异常，消息未送达" });
+        toast.error("发送失败，可点击重试");
+      } else {
+        onPatch(msgId, { status: "sent" });
+      }
+    }, delay);
+  };
+
+  const handleRetry = (msg: DirectMessage) => {
+    onPatch(msg.id, { status: "sending", failReason: undefined });
+    simulateSend(msg.id);
+  };
+
   const handleSend = () => {
     const zh = draftZh.trim();
     if (!zh) return;
@@ -382,16 +401,18 @@ function ChatWindow({
     const now = new Date();
     const pad = (n: number) => String(n).padStart(2, "0");
     const time = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}`;
+    const msgId = `${conv.id}-out-${Date.now()}`;
     onSend({
-      id: `${conv.id}-out-${Date.now()}`,
+      id: msgId,
       direction: "out",
       lang: conv.peerLang,
       text: finalText,
       sourceZh: zh,
       time,
+      status: "sending",
     });
-    toast.success("已发送");
     handleClear();
+    simulateSend(msgId);
   };
 
   return (
