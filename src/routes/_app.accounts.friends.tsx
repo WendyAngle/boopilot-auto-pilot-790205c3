@@ -186,9 +186,29 @@ function FriendsPage() {
 
   const restore = () => {
     if (!active) return;
-    patch(active.id, { status: "pending", decidedAt: undefined });
-    toast.success("已恢复为待处理");
+    patch(active.id, {
+      status: "pending",
+      decidedAt: undefined,
+      publicReasonZh: undefined,
+      publicReasonText: undefined,
+      watchlisted: undefined,
+    });
+    toast.success("已恢复为待处理，可重新决策通过或拒绝");
     setRestoreOpen(false);
+  };
+
+  const toggleWatchlist = () => {
+    if (!active) return;
+    const next = !active.watchlisted;
+    patch(active.id, { watchlisted: next });
+    toast.success(next ? "已加入持续关注：对方再次申请将高亮提醒" : "已移出持续关注");
+  };
+
+  const invitePeer = () => {
+    if (!active || !activeAccount) return;
+    toast.success(
+      `已生成主动添加任务：将由「${activeAccount.nickname}」向「${active.peerName}」发起好友邀请`,
+    );
   };
 
   const removeFriend = () => {
