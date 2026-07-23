@@ -8,7 +8,7 @@ import {
   Users,
   MessageSquareText,
   Languages,
-  RotateCcw,
+  
   Trash2,
   Sparkles,
   Info,
@@ -130,7 +130,7 @@ function FriendsPage() {
   const [approveOpen, setApproveOpen] = useState(false);
   const [rejectOpen, setRejectOpen] = useState(false);
   const [removeOpen, setRemoveOpen] = useState(false);
-  const [restoreOpen, setRestoreOpen] = useState(false);
+  
   const [noteEditOpen, setNoteEditOpen] = useState(false);
 
   const patch = (id: string, p: Partial<FriendRequest>) => {
@@ -165,6 +165,7 @@ function FriendsPage() {
 
   const reject = (publicReasonZh: string, note: string) => {
     if (!active) return;
+    const snapshot = active;
     const publicReasonText = publicReasonZh.trim()
       ? active.peerLang === "zh"
         ? publicReasonZh.trim()
@@ -179,22 +180,20 @@ function FriendsPage() {
     });
     toast.success(
       publicReasonText ? "已拒绝，说明已发送给对方" : "已拒绝好友申请",
+      {
+        duration: 5000,
+        action: {
+          label: "撤销",
+          onClick: () => {
+            setRequests((prev) =>
+              prev.map((r) => (r.id === snapshot.id ? snapshot : r)),
+            );
+            toast.success("已撤销拒绝，申请恢复为待处理");
+          },
+        },
+      },
     );
     setRejectOpen(false);
-  };
-
-
-  const restore = () => {
-    if (!active) return;
-    patch(active.id, {
-      status: "pending",
-      decidedAt: undefined,
-      publicReasonZh: undefined,
-      publicReasonText: undefined,
-      watchlisted: undefined,
-    });
-    toast.success("已恢复为待处理，可重新决策通过或拒绝");
-    setRestoreOpen(false);
   };
 
   const toggleWatchlist = () => {
@@ -500,7 +499,7 @@ function FriendsPage() {
                             关于「已拒绝」的平台事实
                           </div>
                           <div>
-                            多数平台拒绝后原申请即失效、不可复活。此处「恢复为待处理」仅回滚本工作台的决策记录，不会让对方那侧重新看到申请。若需重新建立好友关系，请使用下方「主动添加」或等待对方再次申请。
+                            多数平台拒绝后原申请即失效、不可复活。如需重新建立好友关系，请使用下方「主动向 TA 发起邀请」，或等待对方再次申请；若为误操作，可在拒绝后 5 秒内通过 Toast 中的「撤销」按钮回滚。
                           </div>
                         </div>
                       </div>
@@ -611,15 +610,6 @@ function FriendsPage() {
                       )}
                     </Button>
                     <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setRestoreOpen(true)}
-                      className="gap-1.5"
-                    >
-                      <RotateCcw className="h-3.5 w-3.5" />
-                      恢复为待处理
-                    </Button>
-                    <Button
                       size="sm"
                       onClick={invitePeer}
                       className="gap-1.5"
@@ -683,28 +673,6 @@ function FriendsPage() {
                 >
                   确认解除
                 </AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
-          <AlertDialog open={restoreOpen} onOpenChange={setRestoreOpen}>
-            <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogTitle>恢复为待处理？</AlertDialogTitle>
-                <AlertDialogDescription asChild>
-                  <div className="space-y-2 text-sm text-muted-foreground">
-                    <div>
-                      该申请将回到「待处理」队列，你可以重新决定通过或拒绝。之前填写的对外说明会被清除。
-                    </div>
-                    <div className="rounded-md border border-amber-200 bg-amber-50 p-2.5 text-xs leading-relaxed text-amber-900 dark:border-amber-900/40 dark:bg-amber-950/30 dark:text-amber-200">
-                      <span className="font-medium">注意：</span>
-                      恢复仅为本工作台内部状态回滚，平台侧原申请已失效。如需重新建立好友关系，请使用「主动向 TA 发起邀请」，或等待对方再次申请。
-                    </div>
-                  </div>
-                </AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter>
-                <AlertDialogCancel>取消</AlertDialogCancel>
-                <AlertDialogAction onClick={restore}>确认恢复</AlertDialogAction>
               </AlertDialogFooter>
             </AlertDialogContent>
           </AlertDialog>
