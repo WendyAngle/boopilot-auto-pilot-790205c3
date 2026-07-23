@@ -610,14 +610,10 @@ function FriendsPage() {
                       )}
                     </Button>
                     <Button
-                      variant="outline"
                       size="sm"
-                      onClick={() => setRestoreOpen(true)}
+                      onClick={invitePeer}
                       className="gap-1.5"
                     >
-                      <RotateCcw className="h-3.5 w-3.5" />
-                      恢复为待处理
-                    </Button>
                     <Button
                       size="sm"
                       onClick={invitePeer}
