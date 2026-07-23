@@ -690,8 +690,16 @@ function FriendsPage() {
             <AlertDialogContent>
               <AlertDialogHeader>
                 <AlertDialogTitle>恢复为待处理？</AlertDialogTitle>
-                <AlertDialogDescription>
-                  该好友申请将回到「待处理」队列，你可以重新决定通过或拒绝。
+                <AlertDialogDescription asChild>
+                  <div className="space-y-2 text-sm text-muted-foreground">
+                    <div>
+                      该申请将回到「待处理」队列，你可以重新决定通过或拒绝。之前填写的对外说明会被清除。
+                    </div>
+                    <div className="rounded-md border border-amber-200 bg-amber-50 p-2.5 text-xs leading-relaxed text-amber-900 dark:border-amber-900/40 dark:bg-amber-950/30 dark:text-amber-200">
+                      <span className="font-medium">注意：</span>
+                      恢复仅为本工作台内部状态回滚，平台侧原申请已失效。如需重新建立好友关系，请使用「主动向 TA 发起邀请」，或等待对方再次申请。
+                    </div>
+                  </div>
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>
