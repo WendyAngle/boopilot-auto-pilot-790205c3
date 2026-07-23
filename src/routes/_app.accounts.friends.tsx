@@ -290,6 +290,16 @@ function FriendsPage() {
     setRemoveOpen(false);
   };
 
+  const jumpToFirstReapplication = () => {
+    const first = Array.from(reappMap.values())[0];
+    if (!first) return;
+    if (first.accountId !== activeAccountId) {
+      setActiveAccountId(first.accountId);
+    }
+    setTab("pending");
+    setActiveId(first.id);
+  };
+
   return (
     <div className="flex h-[calc(100vh-8rem)] flex-col gap-3">
       <div>
@@ -298,6 +308,20 @@ function FriendsPage() {
           统一查看各账号收到的加好友请求，通过或拒绝后附加备注/欢迎语，已通过的好友进入「好友列表」。
         </p>
       </div>
+
+      {reappGlobal > 0 && (
+        <div className="flex items-center justify-between gap-3 rounded-lg border border-primary/30 bg-primary/5 px-3 py-2 text-sm">
+          <div className="flex items-center gap-2">
+            <BellRing className="h-4 w-4 text-primary" />
+            <span>
+              有 <span className="font-semibold text-primary">{reappGlobal}</span> 位「持续关注」对象再次发来好友申请
+            </span>
+          </div>
+          <Button size="sm" variant="outline" onClick={jumpToFirstReapplication}>
+            立即查看
+          </Button>
+        </div>
+      )}
 
       <div className="grid flex-1 min-h-0 grid-cols-[240px_320px_1fr] gap-3">
         {/* 左：账号列表 */}
