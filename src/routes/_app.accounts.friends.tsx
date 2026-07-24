@@ -204,6 +204,14 @@ function FriendsPage() {
   const active = requests.find((r) => r.id === activeId);
   const activeAccount = accounts.find((a) => a.id === activeAccountId);
 
+  const allTasks = useTasks();
+  const approveTaskId = allTasks.find(
+    (t) => t.source === "friend-approve" && t.sourceAccountId === activeAccountId,
+  )?.id;
+  const rejectTaskId = allTasks.find(
+    (t) => t.source === "friend-reject" && t.sourceAccountId === activeAccountId,
+  )?.id;
+
   // 动作弹窗
   const [approveOpen, setApproveOpen] = useState(false);
   const [rejectOpen, setRejectOpen] = useState(false);
