@@ -85,7 +85,7 @@ function TaskListPage() {
   }), [tasks]);
 
   const [tKeyword, setTKeyword] = useState("");
-  const [tSubtype, setTSubtype] = useState<"all" | TaskSubType>("all");
+  const [tCategory, setTCategory] = useState<"all" | TaskCategory>("all");
   const [tPlatform, setTPlatform] = useState<"all" | Platform>("all");
   const [tResult, setTResult] = useState<"all" | "success" | "failed" | "partial" | "none">("all");
   const [tExec, setTExec] = useState<"all" | ExecState>("all");
