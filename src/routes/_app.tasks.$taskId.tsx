@@ -183,7 +183,23 @@ function TaskDetailPage() {
   const tasks = useTasks();
   const task = useMemo(() => tasks.find((t) => t.id === taskId), [tasks, taskId]);
 
-  const rawSubtasks = useMemo(() => (task ? buildSubTasks(task) : []), [task]);
+  const activitySubs = useActivitySubtasks(taskId);
+  const rawSubtasks = useMemo<SubTask[]>(() => {
+    if (!task) return [];
+    if (task.source) {
+      return activitySubs.map((s) => ({
+        id: s.id,
+        reachAccount: s.accountName,
+        action: s.action,
+        target: s.target,
+        platform: s.platform,
+        status: s.status as SubStatus,
+        estimated: s.createdAt,
+        actual: s.createdAt,
+      }));
+    }
+    return buildSubTasks(task);
+  }, [task, activitySubs]);
   const [abortedSubs, setAbortedSubs] = useState<Set<string>>(new Set());
 
   const subtasks = useMemo<SubTask[]>(
