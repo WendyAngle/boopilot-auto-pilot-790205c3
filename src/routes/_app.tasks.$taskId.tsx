@@ -435,10 +435,9 @@ function TaskDetailPage() {
               <SelectTrigger className="h-8 w-[160px] text-xs"><SelectValue placeholder="任务结果" /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">全部任务结果</SelectItem>
-                
-                <SelectItem value="success">执行成功</SelectItem>
-                <SelectItem value="failed">执行失败</SelectItem>
+                <SelectItem value="success">全部成功</SelectItem>
                 <SelectItem value="partial">部分成功</SelectItem>
+                <SelectItem value="failed">全部失败</SelectItem>
                 <SelectItem value="none">暂无结果（-）</SelectItem>
               </SelectContent>
             </Select>
