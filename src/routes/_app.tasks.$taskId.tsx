@@ -409,9 +409,9 @@ function TaskDetailPage() {
               <SelectTrigger className="h-8 w-[140px] text-xs"><SelectValue placeholder="动作" /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">全部动作</SelectItem>
-                <SelectItem value={task?.subtype === "nurture" ? "培育" : "触达"}>
-                  {task?.subtype === "nurture" ? "培育" : "触达"}
-                </SelectItem>
+                {Array.from(new Set(subtasks.map((s) => s.action))).map((a) => (
+                  <SelectItem key={a} value={a}>{a}</SelectItem>
+                ))}
               </SelectContent>
             </Select>
             <Select value={fResult} onValueChange={(v) => { setFResult(v as typeof fResult); setPage(1); }}>
