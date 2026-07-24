@@ -682,16 +682,6 @@ function FriendsPage() {
                           value={active.lastInteractAt}
                         />
                       )}
-                      {approveTaskId && (
-                        <Link
-                          to="/tasks/$taskId"
-                          params={{ taskId: approveTaskId }}
-                          className="inline-flex items-center gap-1 text-xs text-primary hover:underline"
-                        >
-                          <ScrollText className="h-3 w-3" />
-                          在任务台账中查看此记录 →
-                        </Link>
-                      )}
                     </>
                   )}
 
