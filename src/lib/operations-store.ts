@@ -110,6 +110,30 @@ export const SUBTYPE_CLS: Record<TaskSubType, string> = {
   action: "bg-amber-500/10 text-amber-600 border-amber-300/40",
 };
 
+/** 任务分类（面向用户展示的任务类型）：养号任务 / 通过好友申请 / 拒绝好友申请 / 私信 */
+export type TaskCategory = "nurture" | "friend-approve" | "friend-reject" | "dm";
+
+export const TASK_CATEGORY_LABEL: Record<TaskCategory, string> = {
+  nurture: "养号任务",
+  "friend-approve": "通过好友申请",
+  "friend-reject": "拒绝好友申请",
+  dm: "私信",
+};
+
+export const TASK_CATEGORY_CLS: Record<TaskCategory, string> = {
+  nurture: "bg-violet-500/10 text-violet-600 border-violet-300/40",
+  "friend-approve": "bg-emerald-500/10 text-emerald-600 border-emerald-300/40",
+  "friend-reject": "bg-rose-500/10 text-rose-600 border-rose-300/40",
+  dm: "bg-sky-500/10 text-sky-600 border-sky-300/40",
+};
+
+export function getTaskCategory(t: Pick<TaskRow, "source">): TaskCategory {
+  if (t.source === "dm") return "dm";
+  if (t.source === "friend-approve") return "friend-approve";
+  if (t.source === "friend-reject") return "friend-reject";
+  return "nurture";
+}
+
 export const STATUS_LABEL: Record<TaskStatus, string> = {
   pending: "待执行",
   running: "执行中",
