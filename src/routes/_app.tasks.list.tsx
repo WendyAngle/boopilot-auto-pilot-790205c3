@@ -51,7 +51,12 @@ export const Route = createFileRoute("/_app/tasks/list")({
   head: () => ({ meta: [{ title: "任务列表 — BooPilot" }] }),
 });
 
-const SUBTYPE_ICON: Record<TaskSubType, LucideIcon> = { nurture: Bot, action: MousePointerClick };
+const CATEGORY_ICON: Record<TaskCategory, LucideIcon> = {
+  nurture: Bot,
+  "friend-approve": UserCheck,
+  "friend-reject": UserX,
+  dm: MessageCircle,
+};
 const STATUS_ICON: Record<TaskStatus, LucideIcon> = {
   pending: Clock3, running: PlayCircle, success: CheckCircle2, failed: XCircle, partial: PauseCircle,
 };
