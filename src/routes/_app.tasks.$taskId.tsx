@@ -33,7 +33,10 @@ import {
   EXEC_STATE_LABEL, EXEC_STATE_CLS,
   type Platform, type ExecState, useTasks, type TaskRow,
 } from "@/lib/operations-store";
+import { useActivitySubtasks, ensureActivityTasksSeeded } from "@/lib/activity-tasks";
 import { USERNAMES } from "@/lib/managed-account-mock";
+
+ensureActivityTasksSeeded();
 
 export const Route = createFileRoute("/_app/tasks/$taskId")({
   component: TaskDetailPage,
@@ -180,7 +183,23 @@ function TaskDetailPage() {
   const tasks = useTasks();
   const task = useMemo(() => tasks.find((t) => t.id === taskId), [tasks, taskId]);
 
-  const rawSubtasks = useMemo(() => (task ? buildSubTasks(task) : []), [task]);
+  const activitySubs = useActivitySubtasks(taskId);
+  const rawSubtasks = useMemo<SubTask[]>(() => {
+    if (!task) return [];
+    if (task.source) {
+      return activitySubs.map((s) => ({
+        id: s.id,
+        reachAccount: s.accountName,
+        action: s.action,
+        target: s.target,
+        platform: s.platform,
+        status: s.status as SubStatus,
+        estimated: s.createdAt,
+        actual: s.createdAt,
+      }));
+    }
+    return buildSubTasks(task);
+  }, [task, activitySubs]);
   const [abortedSubs, setAbortedSubs] = useState<Set<string>>(new Set());
 
   const subtasks = useMemo<SubTask[]>(
@@ -390,9 +409,9 @@ function TaskDetailPage() {
               <SelectTrigger className="h-8 w-[140px] text-xs"><SelectValue placeholder="动作" /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">全部动作</SelectItem>
-                <SelectItem value={task?.subtype === "nurture" ? "培育" : "触达"}>
-                  {task?.subtype === "nurture" ? "培育" : "触达"}
-                </SelectItem>
+                {Array.from(new Set(subtasks.map((s) => s.action))).map((a) => (
+                  <SelectItem key={a} value={a}>{a}</SelectItem>
+                ))}
               </SelectContent>
             </Select>
             <Select value={fResult} onValueChange={(v) => { setFResult(v as typeof fResult); setPage(1); }}>

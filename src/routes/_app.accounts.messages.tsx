@@ -1,6 +1,6 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo, useState, useEffect, useRef } from "react";
-import { Search, Send, Sparkles, Eraser, Languages, Loader2, CheckCheck, MessageSquare, AlertCircle, RotateCw, Star } from "lucide-react";
+import { Search, Send, Sparkles, Eraser, Languages, Loader2, CheckCheck, MessageSquare, AlertCircle, RotateCw, Star, ScrollText } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -19,6 +19,14 @@ import {
   type Conversation,
   type DirectMessage,
 } from "@/lib/messages-mock";
+import { useTasks } from "@/lib/operations-store";
+import {
+  ensureActivityTasksSeeded,
+  recordActivity,
+} from "@/lib/activity-tasks";
+import type { Platform } from "@/lib/managed-account-mock";
+
+ensureActivityTasksSeeded();
 
 export const Route = createFileRoute("/_app/accounts/messages")({
   head: () => ({
@@ -94,6 +102,16 @@ function MessagesPage() {
   const activeAccount = accounts.find(
     (a) => a.id === (activeConv?.accountId ?? activeAccountId),
   );
+
+  // 用于跳转到 任务列表 · 该账号私信任务详情
+  const tasksAll = useTasks();
+  const dmTaskIdByAccount = useMemo(() => {
+    const m = new Map<string, string>();
+    tasksAll.forEach((t) => {
+      if (t.source === "dm" && t.sourceAccountId) m.set(t.sourceAccountId, t.id);
+    });
+    return m;
+  }, [tasksAll]);
 
   const toggleStar = (convId: string) => {
     let nextStarred = false;
@@ -359,8 +377,10 @@ function MessagesPage() {
               <ChatWindow
                 key={activeConv.id}
                 conv={activeConv}
+                accountId={activeAccount.id}
                 accountName={activeAccount.username}
                 accountPlatform={activeAccount.platform}
+                dmTaskId={dmTaskIdByAccount.get(activeAccount.id)}
                 onSend={handleSend}
                 onPatch={(msgId, patch) => patchMessage(activeConv.id, msgId, patch)}
                 onToggleStar={() => toggleStar(activeConv.id)}
@@ -492,15 +512,19 @@ function ConversationItem({
 
 function ChatWindow({
   conv,
+  accountId,
   accountName,
   accountPlatform,
+  dmTaskId,
   onSend,
   onPatch,
   onToggleStar,
 }: {
   conv: Conversation;
+  accountId: string;
   accountName: string;
-  accountPlatform: string;
+  accountPlatform: Platform;
+  dmTaskId?: string;
   onSend: (msg: DirectMessage) => void;
   onPatch: (msgId: string, patch: Partial<DirectMessage>) => void;
   onToggleStar: () => void;
@@ -558,13 +582,18 @@ function ChatWindow({
     setAiOptions([]);
   };
 
-  const simulateSend = (msgId: string) => {
+  const simulateSend = (msgId: string, sourceZh: string) => {
     // 模拟发送：约 15% 概率失败，用于覆盖失败态
     const delay = 900 + Math.random() * 800;
     setTimeout(() => {
       const failed = Math.random() < 0.15;
       if (failed) {
         onPatch(msgId, { status: "failed", failReason: "网络异常，消息未送达" });
+        recordActivity({
+          accountId, accountName, platform: accountPlatform,
+          source: "dm", target: conv.peerName, status: "failed",
+          detail: sourceZh,
+        });
         toast.error(`私信发送失败 · 对方「${conv.peerName}」`, {
           description: "网络异常，消息未送达。可点击重试或稍后再发。",
           duration: 6000,
@@ -572,19 +601,24 @@ function ChatWindow({
             label: "重试",
             onClick: () => {
               onPatch(msgId, { status: "sending", failReason: undefined });
-              simulateSend(msgId);
+              simulateSend(msgId, sourceZh);
             },
           },
         });
       } else {
         onPatch(msgId, { status: "sent" });
+        recordActivity({
+          accountId, accountName, platform: accountPlatform,
+          source: "dm", target: conv.peerName, status: "success",
+          detail: sourceZh,
+        });
       }
     }, delay);
   };
 
   const handleRetry = (msg: DirectMessage) => {
     onPatch(msg.id, { status: "sending", failReason: undefined });
-    simulateSend(msg.id);
+    simulateSend(msg.id, msg.sourceZh ?? msg.text);
   };
 
   const failedMessages = useMemo(
@@ -596,7 +630,7 @@ function ChatWindow({
     if (failedMessages.length === 0) return;
     failedMessages.forEach((m) => {
       onPatch(m.id, { status: "sending", failReason: undefined });
-      simulateSend(m.id);
+      simulateSend(m.id, m.sourceZh ?? m.text);
     });
     toast.info(`正在重试 ${failedMessages.length} 条消息…`);
   };
@@ -619,7 +653,7 @@ function ChatWindow({
       status: "sending",
     });
     handleClear();
-    simulateSend(msgId);
+    simulateSend(msgId, zh);
   };
 
   return (
@@ -638,6 +672,19 @@ function ChatWindow({
             {conv.peerHandle} · 通过账号「{accountName}」({accountPlatform})
           </div>
         </div>
+        {dmTaskId && (
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button asChild size="sm" variant="ghost" className="h-8 gap-1 px-2 text-xs text-muted-foreground hover:text-primary">
+                <Link to="/tasks/$taskId" params={{ taskId: dmTaskId }}>
+                  <ScrollText className="h-3.5 w-3.5" />
+                  查看私信任务
+                </Link>
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>该账号所有私信发送记录已归档到任务列表，点击查看</TooltipContent>
+          </Tooltip>
+        )}
         <Tooltip>
           <TooltipTrigger asChild>
             <Button

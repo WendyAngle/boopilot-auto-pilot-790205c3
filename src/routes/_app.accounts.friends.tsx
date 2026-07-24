@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo, useState, useEffect } from "react";
 import {
   Search,
@@ -16,6 +16,7 @@ import {
   BellRing,
   Clock,
   AlertCircle,
+  ScrollText,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -54,6 +55,10 @@ import {
   type FriendRequest,
   type FriendStatus,
 } from "@/lib/friends-mock";
+import { useTasks } from "@/lib/operations-store";
+import { ensureActivityTasksSeeded, recordActivity } from "@/lib/activity-tasks";
+
+ensureActivityTasksSeeded();
 
 export const Route = createFileRoute("/_app/accounts/friends")({
   head: () => ({
@@ -199,6 +204,14 @@ function FriendsPage() {
   const active = requests.find((r) => r.id === activeId);
   const activeAccount = accounts.find((a) => a.id === activeAccountId);
 
+  const allTasks = useTasks();
+  const approveTaskId = allTasks.find(
+    (t) => t.source === "friend-approve" && t.sourceAccountId === activeAccountId,
+  )?.id;
+  const rejectTaskId = allTasks.find(
+    (t) => t.source === "friend-reject" && t.sourceAccountId === activeAccountId,
+  )?.id;
+
   // 动作弹窗
   const [approveOpen, setApproveOpen] = useState(false);
   const [rejectOpen, setRejectOpen] = useState(false);
@@ -217,7 +230,7 @@ function FriendsPage() {
   };
 
   const approve = (welcomeZh: string, note: string) => {
-    if (!active) return;
+    if (!active || !activeAccount) return;
     const welcomeText = welcomeZh.trim()
       ? active.peerLang === "zh"
         ? welcomeZh
@@ -230,6 +243,15 @@ function FriendsPage() {
       welcomeText,
       note: note.trim() || undefined,
     });
+    recordActivity({
+      accountId: activeAccount.id,
+      accountName: activeAccount.username,
+      platform: activeAccount.platform,
+      source: "friend-approve",
+      target: active.peerName,
+      status: "success",
+      detail: welcomeZh.trim() || "已通过好友申请",
+    });
     toast.success(
       welcomeText ? "已通过，欢迎语已发送给对方" : "已通过好友申请",
     );
@@ -237,7 +259,7 @@ function FriendsPage() {
   };
 
   const reject = (publicReasonZh: string, note: string) => {
-    if (!active) return;
+    if (!active || !activeAccount) return;
     const snapshot = active;
     const publicReasonText = publicReasonZh.trim()
       ? active.peerLang === "zh"
@@ -250,6 +272,15 @@ function FriendsPage() {
       publicReasonZh: publicReasonZh.trim() || undefined,
       publicReasonText,
       note: note.trim() || undefined,
+    });
+    recordActivity({
+      accountId: activeAccount.id,
+      accountName: activeAccount.username,
+      platform: activeAccount.platform,
+      source: "friend-reject",
+      target: active.peerName,
+      status: "success",
+      detail: publicReasonZh.trim() || "已拒绝好友申请",
     });
     toast.success(
       publicReasonText ? "已拒绝，说明已发送给对方" : "已拒绝好友申请",
@@ -302,11 +333,33 @@ function FriendsPage() {
 
   return (
     <div className="flex h-[calc(100vh-8rem)] flex-col gap-3">
-      <div>
-        <h1 className="text-xl font-semibold">好友管理</h1>
-        <p className="mt-1 text-sm text-muted-foreground">
-          统一查看各账号收到的加好友请求，通过或拒绝后附加备注/欢迎语，已通过的好友进入「好友列表」。
-        </p>
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <h1 className="text-xl font-semibold">好友管理</h1>
+          <p className="mt-1 text-sm text-muted-foreground">
+            统一查看各账号收到的加好友请求，通过或拒绝后附加备注/欢迎语，已通过的好友进入「好友列表」。
+          </p>
+        </div>
+        {activeAccount && (approveTaskId || rejectTaskId) && (
+          <div className="flex shrink-0 items-center gap-2">
+            {approveTaskId && (
+              <Button asChild size="sm" variant="outline" className="h-8 gap-1 text-xs">
+                <Link to="/tasks/$taskId" params={{ taskId: approveTaskId }}>
+                  <ScrollText className="h-3.5 w-3.5" />
+                  查看通过任务
+                </Link>
+              </Button>
+            )}
+            {rejectTaskId && (
+              <Button asChild size="sm" variant="outline" className="h-8 gap-1 text-xs">
+                <Link to="/tasks/$taskId" params={{ taskId: rejectTaskId }}>
+                  <ScrollText className="h-3.5 w-3.5" />
+                  查看拒绝任务
+                </Link>
+              </Button>
+            )}
+          </div>
+        )}
       </div>
 
       {reappGlobal > 0 && (
