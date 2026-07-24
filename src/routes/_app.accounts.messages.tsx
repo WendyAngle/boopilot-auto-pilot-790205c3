@@ -1,6 +1,6 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo, useState, useEffect, useRef } from "react";
-import { Search, Send, Sparkles, Eraser, Languages, Loader2, CheckCheck, MessageSquare, AlertCircle, RotateCw, Star } from "lucide-react";
+import { Search, Send, Sparkles, Eraser, Languages, Loader2, CheckCheck, MessageSquare, AlertCircle, RotateCw, Star, ScrollText } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -19,6 +19,14 @@ import {
   type Conversation,
   type DirectMessage,
 } from "@/lib/messages-mock";
+import { useTasks } from "@/lib/operations-store";
+import {
+  ensureActivityTasksSeeded,
+  recordActivity,
+} from "@/lib/activity-tasks";
+import type { Platform } from "@/lib/managed-account-mock";
+
+ensureActivityTasksSeeded();
 
 export const Route = createFileRoute("/_app/accounts/messages")({
   head: () => ({
