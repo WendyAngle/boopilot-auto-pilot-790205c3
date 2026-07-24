@@ -76,6 +76,17 @@ export function isActivityParent(parentId: string): boolean {
   return _byParent.has(parentId);
 }
 
+function deriveParentStatus(
+  list: Pick<ActivitySubTask, "status">[],
+): TaskRow["status"] {
+  if (list.length === 0) return "success";
+  const done = list.filter((s) => s.status === "success").length;
+  const failed = list.filter((s) => s.status === "failed").length;
+  if (failed === 0) return "success";
+  if (done === 0) return "failed";
+  return "partial";
+}
+
 function ensureActivityParent(params: {
   accountId: string;
   accountName: string;
@@ -97,7 +108,7 @@ function ensureActivityParent(params: {
     total: 0,
     done: 0,
     failed: 0,
-    status: "running",
+    status: "success",
     description: `账号「${params.accountName}」在 ${params.platform} 上${ACTIVITY_SOURCE_LABEL[params.source]}的运营台账，每次${ACTIVITY_ACTION_LABEL[params.source]}都会记录为子任务，便于统一审计与日志追溯。`,
     createdBy: "系统",
     createdAt: params.createdAt ?? fmtNow(),
@@ -139,7 +150,13 @@ export function recordActivity(params: {
   _byParent.set(parent.id, list);
   const done = list.filter((s) => s.status === "success").length;
   const failed = list.filter((s) => s.status === "failed").length;
-  tasksActions.update(parent.id, { total: list.length, done, failed });
+  tasksActions.update(parent.id, {
+    total: list.length,
+    done,
+    failed,
+    status: deriveParentStatus(list),
+    endTime: sub.createdAt,
+  });
   emit();
   return sub;
 }
