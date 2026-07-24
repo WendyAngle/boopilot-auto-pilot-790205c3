@@ -117,10 +117,10 @@ function TaskListPage() {
     return filteredTasks.slice(start, start + pageSize);
   }, [filteredTasks, taskPage]);
 
-  const tasksFiltersActive = tKeyword.trim() !== "" || tSubtype !== "all" || tPlatform !== "all" || tResult !== "all" || tExec !== "all";
+  const tasksFiltersActive = tKeyword.trim() !== "" || tCategory !== "all" || tPlatform !== "all" || tResult !== "all" || tExec !== "all";
 
   const resetTaskFilters = () => {
-    setTKeyword(""); setTSubtype("all"); setTPlatform("all"); setTResult("all"); setTExec("all"); setTaskPage(1);
+    setTKeyword(""); setTCategory("all"); setTPlatform("all"); setTResult("all"); setTExec("all"); setTaskPage(1);
   };
 
   const handleManualSaveTemplate = () => {
