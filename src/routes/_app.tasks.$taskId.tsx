@@ -439,7 +439,7 @@ function TaskDetailPage() {
                 <SelectItem value="success">执行成功</SelectItem>
                 <SelectItem value="failed">执行失败</SelectItem>
                 <SelectItem value="partial">部分成功</SelectItem>
-                <SelectItem value="none">无结果（-）</SelectItem>
+                <SelectItem value="none">暂无结果（-）</SelectItem>
               </SelectContent>
             </Select>
             <Select value={fExec} onValueChange={(v) => { setFExec(v as typeof fExec); setPage(1); }}>
