@@ -94,7 +94,7 @@ function TaskListPage() {
     const kw = tKeyword.trim().toLowerCase();
     return tasks.filter((t) => {
       if (kw && !t.name.toLowerCase().includes(kw) && !t.id.toLowerCase().includes(kw)) return false;
-      if (tSubtype !== "all" && t.subtype !== tSubtype) return false;
+      if (tCategory !== "all" && getTaskCategory(t) !== tCategory) return false;
       if (tPlatform !== "all" && !t.platforms.includes(tPlatform)) return false;
       if (tResult !== "all") {
         const showsDash = t.aborted || t.status === "pending" || t.status === "running";
