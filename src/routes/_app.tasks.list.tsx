@@ -5,8 +5,9 @@ import { StatCard } from "@/components/stat-card";
 import { PaginationBar } from "@/components/pagination-bar";
 import {
   Bot, Sparkles, ListChecks, CheckCircle2, XCircle, Clock3,
-  PlayCircle, MousePointerClick, PauseCircle, Trash2, BookmarkPlus, StopCircle,
-  Search, RotateCcw, Filter, Eye, ScrollText, BarChart3, Pencil, MoreHorizontal, Info, type LucideIcon,
+  PlayCircle, PauseCircle, Trash2, BookmarkPlus, StopCircle,
+  Search, RotateCcw, Filter, Eye, ScrollText, BarChart3, Pencil, MoreHorizontal, Info,
+  MessageCircle, UserCheck, UserX, type LucideIcon,
 } from "lucide-react";
 import { UseTemplateDialog } from "@/components/use-template-dialog";
 import { ensureActivityTasksSeeded } from "@/lib/activity-tasks";
@@ -33,9 +34,10 @@ import {
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
 import {
-  PLATFORMS, PLATFORM_CHIP, SUBTYPE_LABEL, SUBTYPE_CLS, STATUS_LABEL, STATUS_CLS,
+  PLATFORMS, PLATFORM_CHIP, STATUS_LABEL, STATUS_CLS,
   EXEC_STATE_LABEL, EXEC_STATE_CLS, getExecState, isForeverTask,
-  type Platform, type TaskSubType, type TaskStatus, type ExecState, type TaskRow, type TaskTemplate,
+  TASK_CATEGORY_LABEL, TASK_CATEGORY_CLS, getTaskCategory,
+  type Platform, type TaskStatus, type ExecState, type TaskRow, type TaskTemplate, type TaskCategory,
   useTasks, tasksActions, templatesActions,
   executeTask, abortTask, fmtNow, uid,
 } from "@/lib/operations-store";
@@ -49,7 +51,12 @@ export const Route = createFileRoute("/_app/tasks/list")({
   head: () => ({ meta: [{ title: "任务列表 — BooPilot" }] }),
 });
 
-const SUBTYPE_ICON: Record<TaskSubType, LucideIcon> = { nurture: Bot, action: MousePointerClick };
+const CATEGORY_ICON: Record<TaskCategory, LucideIcon> = {
+  nurture: Bot,
+  "friend-approve": UserCheck,
+  "friend-reject": UserX,
+  dm: MessageCircle,
+};
 const STATUS_ICON: Record<TaskStatus, LucideIcon> = {
   pending: Clock3, running: PlayCircle, success: CheckCircle2, failed: XCircle, partial: PauseCircle,
 };
@@ -78,7 +85,7 @@ function TaskListPage() {
   }), [tasks]);
 
   const [tKeyword, setTKeyword] = useState("");
-  const [tSubtype, setTSubtype] = useState<"all" | TaskSubType>("all");
+  const [tCategory, setTCategory] = useState<"all" | TaskCategory>("all");
   const [tPlatform, setTPlatform] = useState<"all" | Platform>("all");
   const [tResult, setTResult] = useState<"all" | "success" | "failed" | "partial" | "none">("all");
   const [tExec, setTExec] = useState<"all" | ExecState>("all");
@@ -87,7 +94,7 @@ function TaskListPage() {
     const kw = tKeyword.trim().toLowerCase();
     return tasks.filter((t) => {
       if (kw && !t.name.toLowerCase().includes(kw) && !t.id.toLowerCase().includes(kw)) return false;
-      if (tSubtype !== "all" && t.subtype !== tSubtype) return false;
+      if (tCategory !== "all" && getTaskCategory(t) !== tCategory) return false;
       if (tPlatform !== "all" && !t.platforms.includes(tPlatform)) return false;
       if (tResult !== "all") {
         const showsDash = t.aborted || t.status === "pending" || t.status === "running";
@@ -100,7 +107,7 @@ function TaskListPage() {
       if (tExec !== "all" && getExecState(t) !== tExec) return false;
       return true;
     });
-  }, [tasks, tKeyword, tSubtype, tPlatform, tResult, tExec]);
+  }, [tasks, tKeyword, tCategory, tPlatform, tResult, tExec]);
 
   const pageSize = 10;
   const [taskPage, setTaskPage] = useState(1);
@@ -110,10 +117,10 @@ function TaskListPage() {
     return filteredTasks.slice(start, start + pageSize);
   }, [filteredTasks, taskPage]);
 
-  const tasksFiltersActive = tKeyword.trim() !== "" || tSubtype !== "all" || tPlatform !== "all" || tResult !== "all" || tExec !== "all";
+  const tasksFiltersActive = tKeyword.trim() !== "" || tCategory !== "all" || tPlatform !== "all" || tResult !== "all" || tExec !== "all";
 
   const resetTaskFilters = () => {
-    setTKeyword(""); setTSubtype("all"); setTPlatform("all"); setTResult("all"); setTExec("all"); setTaskPage(1);
+    setTKeyword(""); setTCategory("all"); setTPlatform("all"); setTResult("all"); setTExec("all"); setTaskPage(1);
   };
 
   const handleManualSaveTemplate = () => {
@@ -156,12 +163,13 @@ function TaskListPage() {
               <Search className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
               <Input value={tKeyword} onChange={(e) => setTKeyword(e.target.value)} placeholder="搜索任务名称 / ID" className="h-8 pl-8 text-xs" />
             </div>
-            <Select value={tSubtype} onValueChange={(v) => setTSubtype(v as typeof tSubtype)}>
-              <SelectTrigger className="h-8 w-[140px] text-xs"><SelectValue placeholder="类型" /></SelectTrigger>
+            <Select value={tCategory} onValueChange={(v) => setTCategory(v as typeof tCategory)}>
+              <SelectTrigger className="h-8 w-[160px] text-xs"><SelectValue placeholder="任务类型" /></SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">全部类型</SelectItem>
-                <SelectItem value="nurture">周期性</SelectItem>
-                <SelectItem value="action">单次触达</SelectItem>
+                <SelectItem value="all">全部任务类型</SelectItem>
+                {(Object.keys(TASK_CATEGORY_LABEL) as TaskCategory[]).map((c) => (
+                  <SelectItem key={c} value={c}>{TASK_CATEGORY_LABEL[c]}</SelectItem>
+                ))}
               </SelectContent>
             </Select>
             <Select value={tPlatform} onValueChange={(v) => setTPlatform(v as typeof tPlatform)}>
@@ -231,8 +239,9 @@ function TaskListPage() {
                   </TableRow>
                 ) : pagedFilteredTasks.map((t) => {
                   const SIcon = STATUS_ICON[t.status];
-                  const TIcon = SUBTYPE_ICON[t.subtype];
-                  
+                  const category = getTaskCategory(t);
+                  const TIcon = CATEGORY_ICON[category];
+
                   return (
                     <TableRow key={t.id} className="border-b-border/40">
                       <TableCell>
@@ -242,8 +251,8 @@ function TaskListPage() {
 
                       </TableCell>
                       <TableCell>
-                        <Badge variant="outline" className={cn("gap-1 text-xs font-normal", SUBTYPE_CLS[t.subtype])}>
-                          <TIcon className="h-3 w-3" />{SUBTYPE_LABEL[t.subtype]}
+                        <Badge variant="outline" className={cn("gap-1 text-xs font-normal", TASK_CATEGORY_CLS[category])}>
+                          <TIcon className="h-3 w-3" />{TASK_CATEGORY_LABEL[category]}
                         </Badge>
                       </TableCell>
                       <TableCell>
@@ -370,7 +379,7 @@ function TaskListPage() {
             {saveTplFor && (
               <div className="space-y-1 rounded-lg border bg-muted/30 p-3 text-xs">
                 <div className="text-muted-foreground">将保留以下配置：</div>
-                <div>类型：{SUBTYPE_LABEL[saveTplFor.subtype]}</div>
+                <div>类型：{TASK_CATEGORY_LABEL[getTaskCategory(saveTplFor)]}</div>
                 <div>平台：{saveTplFor.platforms.join(" / ")}</div>
                 <div>数量：{saveTplFor.total}</div>
               </div>
