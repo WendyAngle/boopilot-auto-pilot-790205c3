@@ -55,6 +55,10 @@ import {
   type FriendRequest,
   type FriendStatus,
 } from "@/lib/friends-mock";
+import { useTasks } from "@/lib/operations-store";
+import { ensureActivityTasksSeeded, recordActivity } from "@/lib/activity-tasks";
+
+ensureActivityTasksSeeded();
 
 export const Route = createFileRoute("/_app/accounts/friends")({
   head: () => ({
