@@ -33,7 +33,10 @@ import {
   EXEC_STATE_LABEL, EXEC_STATE_CLS,
   type Platform, type ExecState, useTasks, type TaskRow,
 } from "@/lib/operations-store";
+import { useActivitySubtasks, ensureActivityTasksSeeded } from "@/lib/activity-tasks";
 import { USERNAMES } from "@/lib/managed-account-mock";
+
+ensureActivityTasksSeeded();
 
 export const Route = createFileRoute("/_app/tasks/$taskId")({
   component: TaskDetailPage,
