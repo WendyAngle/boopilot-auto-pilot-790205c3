@@ -379,7 +379,7 @@ function TaskListPage() {
             {saveTplFor && (
               <div className="space-y-1 rounded-lg border bg-muted/30 p-3 text-xs">
                 <div className="text-muted-foreground">将保留以下配置：</div>
-                <div>类型：{SUBTYPE_LABEL[saveTplFor.subtype]}</div>
+                <div>类型：{TASK_CATEGORY_LABEL[getTaskCategory(saveTplFor)]}</div>
                 <div>平台：{saveTplFor.platforms.join(" / ")}</div>
                 <div>数量：{saveTplFor.total}</div>
               </div>
