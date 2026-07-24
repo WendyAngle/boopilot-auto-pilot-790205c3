@@ -265,6 +265,8 @@ export function ensureActivityTasksSeeded() {
           platform: acc.platform,
           source: isApprove ? "friend-approve" : "friend-reject",
           target: r.peerName,
+          peerHandle: r.peerHandle,
+          peerAvatar: r.peerAvatar,
           status: "success",
           detail: isApprove
             ? r.welcomeZh ?? r.note ?? "已通过好友申请"
