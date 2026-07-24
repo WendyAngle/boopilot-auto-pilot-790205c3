@@ -618,7 +618,7 @@ function ChatWindow({
 
   const handleRetry = (msg: DirectMessage) => {
     onPatch(msg.id, { status: "sending", failReason: undefined });
-    simulateSend(msg.id);
+    simulateSend(msg.id, msg.sourceZh ?? msg.text);
   };
 
   const failedMessages = useMemo(
@@ -630,7 +630,7 @@ function ChatWindow({
     if (failedMessages.length === 0) return;
     failedMessages.forEach((m) => {
       onPatch(m.id, { status: "sending", failReason: undefined });
-      simulateSend(m.id);
+      simulateSend(m.id, m.sourceZh ?? m.text);
     });
     toast.info(`正在重试 ${failedMessages.length} 条消息…`);
   };
@@ -653,7 +653,7 @@ function ChatWindow({
       status: "sending",
     });
     handleClear();
-    simulateSend(msgId);
+    simulateSend(msgId, zh);
   };
 
   return (
