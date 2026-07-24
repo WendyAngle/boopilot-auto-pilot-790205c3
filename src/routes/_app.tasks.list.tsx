@@ -9,6 +9,9 @@ import {
   Search, RotateCcw, Filter, Eye, ScrollText, BarChart3, Pencil, MoreHorizontal, Info, type LucideIcon,
 } from "lucide-react";
 import { UseTemplateDialog } from "@/components/use-template-dialog";
+import { ensureActivityTasksSeeded } from "@/lib/activity-tasks";
+
+ensureActivityTasksSeeded();
 
 import { toast } from "sonner";
 
