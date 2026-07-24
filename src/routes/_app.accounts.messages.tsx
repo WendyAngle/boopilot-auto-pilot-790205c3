@@ -512,15 +512,19 @@ function ConversationItem({
 
 function ChatWindow({
   conv,
+  accountId,
   accountName,
   accountPlatform,
+  dmTaskId,
   onSend,
   onPatch,
   onToggleStar,
 }: {
   conv: Conversation;
+  accountId: string;
   accountName: string;
-  accountPlatform: string;
+  accountPlatform: Platform;
+  dmTaskId?: string;
   onSend: (msg: DirectMessage) => void;
   onPatch: (msgId: string, patch: Partial<DirectMessage>) => void;
   onToggleStar: () => void;
