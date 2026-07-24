@@ -34,6 +34,7 @@ import {
   type Platform, type ExecState, useTasks, type TaskRow,
 } from "@/lib/operations-store";
 import { useActivitySubtasks, ensureActivityTasksSeeded } from "@/lib/activity-tasks";
+import { ActivityTaskDetail } from "@/components/activity-task-detail";
 import { USERNAMES } from "@/lib/managed-account-mock";
 
 ensureActivityTasksSeeded();
@@ -322,6 +323,22 @@ function TaskDetailPage() {
           未找到任务 <span className="font-mono">{taskId}</span>
         </div>
       </div>
+    );
+  }
+
+  // 活动台账类任务（私信 / 通过好友申请 / 拒绝好友申请）使用专用视图
+  if (task.source) {
+    return (
+      <TooltipProvider delayDuration={200}>
+        <div className="space-y-6">
+          <div className="flex items-center gap-2">
+            <Button variant="ghost" size="sm" className="gap-1.5 -ml-2" onClick={() => navigate({ to: "/tasks/list" })}>
+              <ArrowLeft className="h-4 w-4" />返回任务列表
+            </Button>
+          </div>
+          <ActivityTaskDetail task={task} subtasks={activitySubs} />
+        </div>
+      </TooltipProvider>
     );
   }
 

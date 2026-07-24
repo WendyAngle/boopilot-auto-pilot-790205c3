@@ -43,8 +43,12 @@ export interface ActivitySubTask {
   accountName: string;
   platform: Platform;
   action: string;
-  /** 对方昵称/账号，用于「目标」列展示 */
+  /** 对方昵称（目标账号显示名） */
   target: string;
+  /** 对方在平台上的 handle，如 @emily.c */
+  peerHandle?: string;
+  /** 对方头像 URL */
+  peerAvatar?: string;
   status: "success" | "failed";
   createdAt: string;
   /** 摘要：私信内容 / 欢迎语 / 拒绝说明 */
@@ -127,6 +131,8 @@ export function recordActivity(params: {
   platform: Platform;
   source: ActivitySource;
   target: string;
+  peerHandle?: string;
+  peerAvatar?: string;
   status: "success" | "failed";
   detail?: string;
   createdAt?: string;
@@ -142,6 +148,8 @@ export function recordActivity(params: {
     platform: params.platform,
     action: ACTIVITY_ACTION_LABEL[params.source],
     target: params.target,
+    peerHandle: params.peerHandle,
+    peerAvatar: params.peerAvatar,
     status: params.status,
     createdAt: params.createdAt ?? fmtNow(),
     detail: params.detail,
@@ -196,6 +204,8 @@ export function ensureActivityTasksSeeded() {
       const dmRecords: Array<{
         accId: string;
         peerName: string;
+        peerHandle: string;
+        peerAvatar: string;
         text: string;
         status: "success" | "failed";
         time: string;
@@ -209,6 +219,8 @@ export function ensureActivityTasksSeeded() {
           dmRecords.push({
             accId: conv.accountId,
             peerName: conv.peerName,
+            peerHandle: conv.peerHandle,
+            peerAvatar: conv.peerAvatar,
             text: m.sourceZh ?? m.text,
             status: st,
             time: m.time,
@@ -226,6 +238,8 @@ export function ensureActivityTasksSeeded() {
           platform: acc.platform,
           source: "dm",
           target: r.peerName,
+          peerHandle: r.peerHandle,
+          peerAvatar: r.peerAvatar,
           status: r.status,
           detail: r.status === "failed" && r.failReason
             ? `${r.text}（${r.failReason}）`
@@ -251,6 +265,8 @@ export function ensureActivityTasksSeeded() {
           platform: acc.platform,
           source: isApprove ? "friend-approve" : "friend-reject",
           target: r.peerName,
+          peerHandle: r.peerHandle,
+          peerAvatar: r.peerAvatar,
           status: "success",
           detail: isApprove
             ? r.welcomeZh ?? r.note ?? "已通过好友申请"
