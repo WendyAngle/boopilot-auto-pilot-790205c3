@@ -222,7 +222,7 @@ function FriendsPage() {
   };
 
   const approve = (welcomeZh: string, note: string) => {
-    if (!active) return;
+    if (!active || !activeAccount) return;
     const welcomeText = welcomeZh.trim()
       ? active.peerLang === "zh"
         ? welcomeZh
@@ -235,6 +235,15 @@ function FriendsPage() {
       welcomeText,
       note: note.trim() || undefined,
     });
+    recordActivity({
+      accountId: activeAccount.id,
+      accountName: activeAccount.username,
+      platform: activeAccount.platform,
+      source: "friend-approve",
+      target: active.peerName,
+      status: "success",
+      detail: welcomeZh.trim() || "已通过好友申请",
+    });
     toast.success(
       welcomeText ? "已通过，欢迎语已发送给对方" : "已通过好友申请",
     );
@@ -242,7 +251,7 @@ function FriendsPage() {
   };
 
   const reject = (publicReasonZh: string, note: string) => {
-    if (!active) return;
+    if (!active || !activeAccount) return;
     const snapshot = active;
     const publicReasonText = publicReasonZh.trim()
       ? active.peerLang === "zh"
@@ -255,6 +264,15 @@ function FriendsPage() {
       publicReasonZh: publicReasonZh.trim() || undefined,
       publicReasonText,
       note: note.trim() || undefined,
+    });
+    recordActivity({
+      accountId: activeAccount.id,
+      accountName: activeAccount.username,
+      platform: activeAccount.platform,
+      source: "friend-reject",
+      target: active.peerName,
+      status: "success",
+      detail: publicReasonZh.trim() || "已拒绝好友申请",
     });
     toast.success(
       publicReasonText ? "已拒绝，说明已发送给对方" : "已拒绝好友申请",
