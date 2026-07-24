@@ -34,6 +34,7 @@ import {
   type Platform, type ExecState, useTasks, type TaskRow,
 } from "@/lib/operations-store";
 import { useActivitySubtasks, ensureActivityTasksSeeded } from "@/lib/activity-tasks";
+import { ActivityTaskDetail } from "@/components/activity-task-detail";
 import { USERNAMES } from "@/lib/managed-account-mock";
 
 ensureActivityTasksSeeded();
