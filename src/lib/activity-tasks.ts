@@ -171,16 +171,11 @@ export function useActivitySubtasks(parentId: string): ActivitySubTask[] {
 }
 
 /* ============================================================ */
-/* 初始种子：为已有 mock 会话/好友数据补齐历史台账                */
-/* ============================================================ */
-
-let _seeded = false;
-
-/* ============================================================ */
 /* 初始种子：与 messages-mock / friends-mock 完全一致                */
 /* ============================================================ */
 
 let _seeded = false;
+
 
 export function ensureActivityTasksSeeded() {
   if (_seeded) return;
