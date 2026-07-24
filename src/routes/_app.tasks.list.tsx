@@ -239,8 +239,9 @@ function TaskListPage() {
                   </TableRow>
                 ) : pagedFilteredTasks.map((t) => {
                   const SIcon = STATUS_ICON[t.status];
-                  const TIcon = SUBTYPE_ICON[t.subtype];
-                  
+                  const category = getTaskCategory(t);
+                  const TIcon = CATEGORY_ICON[category];
+
                   return (
                     <TableRow key={t.id} className="border-b-border/40">
                       <TableCell>
@@ -250,8 +251,8 @@ function TaskListPage() {
 
                       </TableCell>
                       <TableCell>
-                        <Badge variant="outline" className={cn("gap-1 text-xs font-normal", SUBTYPE_CLS[t.subtype])}>
-                          <TIcon className="h-3 w-3" />{SUBTYPE_LABEL[t.subtype]}
+                        <Badge variant="outline" className={cn("gap-1 text-xs font-normal", TASK_CATEGORY_CLS[category])}>
+                          <TIcon className="h-3 w-3" />{TASK_CATEGORY_LABEL[category]}
                         </Badge>
                       </TableCell>
                       <TableCell>
