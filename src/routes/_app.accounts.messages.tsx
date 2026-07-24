@@ -582,13 +582,18 @@ function ChatWindow({
     setAiOptions([]);
   };
 
-  const simulateSend = (msgId: string) => {
+  const simulateSend = (msgId: string, sourceZh: string) => {
     // 模拟发送：约 15% 概率失败，用于覆盖失败态
     const delay = 900 + Math.random() * 800;
     setTimeout(() => {
       const failed = Math.random() < 0.15;
       if (failed) {
         onPatch(msgId, { status: "failed", failReason: "网络异常，消息未送达" });
+        recordActivity({
+          accountId, accountName, platform: accountPlatform,
+          source: "dm", target: conv.peerName, status: "failed",
+          detail: sourceZh,
+        });
         toast.error(`私信发送失败 · 对方「${conv.peerName}」`, {
           description: "网络异常，消息未送达。可点击重试或稍后再发。",
           duration: 6000,
@@ -596,12 +601,17 @@ function ChatWindow({
             label: "重试",
             onClick: () => {
               onPatch(msgId, { status: "sending", failReason: undefined });
-              simulateSend(msgId);
+              simulateSend(msgId, sourceZh);
             },
           },
         });
       } else {
         onPatch(msgId, { status: "sent" });
+        recordActivity({
+          accountId, accountName, platform: accountPlatform,
+          source: "dm", target: conv.peerName, status: "success",
+          detail: sourceZh,
+        });
       }
     }, delay);
   };
