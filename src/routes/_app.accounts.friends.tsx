@@ -333,33 +333,11 @@ function FriendsPage() {
 
   return (
     <div className="flex h-[calc(100vh-8rem)] flex-col gap-3">
-      <div className="flex items-start justify-between gap-3">
-        <div>
-          <h1 className="text-xl font-semibold">好友管理</h1>
-          <p className="mt-1 text-sm text-muted-foreground">
-            统一查看各账号收到的加好友请求，通过或拒绝后附加备注/欢迎语，已通过的好友进入「好友列表」。
-          </p>
-        </div>
-        {activeAccount && (approveTaskId || rejectTaskId) && (
-          <div className="flex shrink-0 items-center gap-2">
-            {approveTaskId && (
-              <Button asChild size="sm" variant="outline" className="h-8 gap-1 text-xs">
-                <Link to="/tasks/$taskId" params={{ taskId: approveTaskId }}>
-                  <ScrollText className="h-3.5 w-3.5" />
-                  查看通过任务
-                </Link>
-              </Button>
-            )}
-            {rejectTaskId && (
-              <Button asChild size="sm" variant="outline" className="h-8 gap-1 text-xs">
-                <Link to="/tasks/$taskId" params={{ taskId: rejectTaskId }}>
-                  <ScrollText className="h-3.5 w-3.5" />
-                  查看拒绝任务
-                </Link>
-              </Button>
-            )}
-          </div>
-        )}
+      <div>
+        <h1 className="text-xl font-semibold">好友管理</h1>
+        <p className="mt-1 text-sm text-muted-foreground">
+          统一查看各账号收到的加好友请求，通过或拒绝后附加备注/欢迎语，已通过的好友进入「好友列表」。
+        </p>
       </div>
 
       {reappGlobal > 0 && (
