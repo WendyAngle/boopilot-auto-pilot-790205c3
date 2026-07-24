@@ -367,8 +367,10 @@ function MessagesPage() {
               <ChatWindow
                 key={activeConv.id}
                 conv={activeConv}
+                accountId={activeAccount.id}
                 accountName={activeAccount.username}
                 accountPlatform={activeAccount.platform}
+                dmTaskId={dmTaskIdByAccount.get(activeAccount.id)}
                 onSend={handleSend}
                 onPatch={(msgId, patch) => patchMessage(activeConv.id, msgId, patch)}
                 onToggleStar={() => toggleStar(activeConv.id)}
