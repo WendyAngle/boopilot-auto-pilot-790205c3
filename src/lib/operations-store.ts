@@ -139,8 +139,8 @@ export function getTaskCategory(t: Pick<TaskRow, "source">): TaskCategory {
 export const STATUS_LABEL: Record<TaskStatus, string> = {
   pending: "待执行",
   running: "执行中",
-  success: "执行成功",
-  failed: "执行失败",
+  success: "全部成功",
+  failed: "全部失败",
   partial: "部分成功",
 };
 
