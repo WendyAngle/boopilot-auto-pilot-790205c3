@@ -115,10 +115,10 @@ export type TaskCategory = "nurture" | "friend-approve" | "friend-reject" | "dm"
 
 export const TASK_CATEGORY_LABEL: Record<TaskCategory, string> = {
   nurture: "养号任务",
+  dm: "私信任务",
+  coview: "账号同屏任务",
   "friend-approve": "通过好友申请",
   "friend-reject": "拒绝好友申请",
-  dm: "私信",
-  coview: "账号同屏",
 };
 
 export const TASK_CATEGORY_CLS: Record<TaskCategory, string> = {
