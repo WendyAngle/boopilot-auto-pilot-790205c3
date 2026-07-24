@@ -176,50 +176,11 @@ export function useActivitySubtasks(parentId: string): ActivitySubTask[] {
 
 let _seeded = false;
 
-/** 用确定的时间戳，避免 SSR/CSR 水合不一致 */
-function seedTs(dayOffset: number, hour: number, minute: number): string {
-  const d = new Date(2026, 4, 15 + dayOffset, hour, minute, 0);
-  const pad = (n: number) => String(n).padStart(2, "0");
-  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:00`;
-}
+/* ============================================================ */
+/* 初始种子：与 messages-mock / friends-mock 完全一致                */
+/* ============================================================ */
 
-// 私信内容模版池（覆盖成功/失败多语义场景）
-const DM_SUCCESS_TEMPLATES = [
-  "感谢您的咨询，我们已收到消息，稍后专员会与您联系。",
-  "促销活动详情请查看主页置顶帖，本周下单额外 9 折。",
-  "您好，该款商品目前有现货，支持全球直邮，预计 5-7 个工作日送达。",
-  "已为您登记需求，稍后我们会通过邮件发送详细报价单。",
-  "感谢关注，新品将在下周一上架，敬请期待。",
-  "这是我们的官方客服渠道，请放心沟通，如需发票请提供抬头。",
-  "已收到您的反馈，我们会在 24 小时内跟进处理。",
-  "您好，订单号已核对，正在为您加急处理，感谢耐心等待。",
-  "促销码 WELCOME10 可享首单立减，有效期至月底。",
-  "很高兴认识您，如有合作意向可加我们商务微信详聊。",
-];
-const DM_FAIL_TEMPLATES = [
-  "网络异常，消息未送达，请稍后重试。",
-  "对方账号临时限制接收私信，发送失败。",
-  "触发平台风控，本条消息未成功送达。",
-  "会话已被对方关闭，消息发送失败。",
-];
-
-// 好友通过欢迎语模版池
-const APPROVE_TEMPLATES = [
-  "感谢通过好友申请，期待与您进一步交流。",
-  "您好，欢迎加为好友，如有产品咨询随时联系。",
-  "很高兴认识您，稍后会发送品牌资料供您参考。",
-  "已通过您的申请，欢迎关注我们的最新动态。",
-  "感谢添加，我们正在筹备线上活动，欢迎参与。",
-  "已通过好友申请，日常会分享行业资讯，希望对您有帮助。",
-];
-// 好友拒绝对外说明模版池
-const REJECT_TEMPLATES = [
-  "感谢关注，本账号暂不接受陌生好友，请通过官方渠道联系。",
-  "抱歉，好友名额已满，如有业务合作请联系商务邮箱。",
-  "您好，该账号仅用于品牌发布，暂不添加个人好友。",
-  "感谢申请，请通过主页链接进入官网了解更多。",
-  "近期账号频繁维护，暂不通过新好友申请，敬请谅解。",
-];
+let _seeded = false;
 
 export function ensureActivityTasksSeeded() {
   if (_seeded) return;
@@ -231,71 +192,75 @@ export function ensureActivityTasksSeeded() {
         import("./messages-mock"),
         import("./friends-mock"),
       ]);
-      // ---- 私信台账：覆盖前 8 个账号，每账号最多 3 个会话，每会话 3-6 条子任务 ----
+
+      // ---- 私信台账：以 messages-mock 中的实际出站消息为准 ----
+      // 出站 status: sent -> 成功；failed -> 失败；sending -> 暂不入台账（尚未终态）
       const { accounts: msgAccounts, conversations } = getInboxData();
-      msgAccounts.slice(0, 8).forEach((acc, ai) => {
-        const convs = conversations.filter((c) => c.accountId === acc.id).slice(0, 3);
-        convs.forEach((conv, ci) => {
-          // 每个会话 3-6 条历史子任务
-          const count = 3 + ((ai + ci) % 4); // 3~6
-          for (let i = 0; i < count; i++) {
-            // 每个会话最后一条 20% 概率失败，前面均为成功
-            const isFail = i === count - 1 && (ai + ci) % 5 === 0;
-            const pool = isFail ? DM_FAIL_TEMPLATES : DM_SUCCESS_TEMPLATES;
-            const detail = pool[(ai * 7 + ci * 3 + i) % pool.length];
-            recordActivity({
-              accountId: acc.id,
-              accountName: acc.username,
-              platform: acc.platform,
-              source: "dm",
-              target: conv.peerName,
-              status: isFail ? "failed" : "success",
-              detail,
-              createdAt: seedTs(ai, 9 + ci * 2, i * 7 + ci),
-            });
-          }
+      const accById = new Map(msgAccounts.map((a) => [a.id, a]));
+      // 按时间升序，保持子任务插入顺序与实际发生顺序一致
+      const dmRecords: Array<{
+        accId: string;
+        peerName: string;
+        text: string;
+        status: "success" | "failed";
+        time: string;
+        failReason?: string;
+      }> = [];
+      conversations.forEach((conv) => {
+        conv.messages.forEach((m) => {
+          if (m.direction !== "out") return;
+          if (m.status === "sending") return; // 未落地
+          const st: "success" | "failed" = m.status === "failed" ? "failed" : "success";
+          dmRecords.push({
+            accId: conv.accountId,
+            peerName: conv.peerName,
+            text: m.sourceZh ?? m.text,
+            status: st,
+            time: m.time,
+            failReason: m.failReason,
+          });
+        });
+      });
+      dmRecords.sort((a, b) => (a.time < b.time ? -1 : 1));
+      dmRecords.forEach((r) => {
+        const acc = accById.get(r.accId);
+        if (!acc) return;
+        recordActivity({
+          accountId: acc.id,
+          accountName: acc.username,
+          platform: acc.platform,
+          source: "dm",
+          target: r.peerName,
+          status: r.status,
+          detail: r.status === "failed" && r.failReason
+            ? `${r.text}（${r.failReason}）`
+            : r.text,
+          createdAt: r.time,
         });
       });
 
-      // ---- 好友通过/拒绝台账：覆盖前 8 个账号 ----
+      // ---- 好友通过/拒绝台账：以 friends-mock 中已处理的申请为准 ----
       const { accounts: frAccounts, requests } = getFriendData();
-      frAccounts.slice(0, 8).forEach((acc, ai) => {
-        const accepted = requests
-          .filter((r) => r.accountId === acc.id && r.status === "accepted")
-          .slice(0, 5);
-        const rejected = requests
-          .filter((r) => r.accountId === acc.id && r.status === "rejected")
-          .slice(0, 4);
-        accepted.forEach((r, i) => {
-          // 通过操作偶发失败（平台校验失败等）
-          const isFail = i > 0 && (ai + i) % 7 === 0;
-          recordActivity({
-            accountId: acc.id,
-            accountName: acc.username,
-            platform: acc.platform,
-            source: "friend-approve",
-            target: r.peerName,
-            status: isFail ? "failed" : "success",
-            detail: isFail
-              ? "平台校验未通过，通过操作失败，请稍后重试。"
-              : r.welcomeZh ?? APPROVE_TEMPLATES[(ai + i) % APPROVE_TEMPLATES.length],
-            createdAt: seedTs(ai, 14, i * 5),
-          });
-        });
-        rejected.forEach((r, i) => {
-          const isFail = i > 0 && (ai + i) % 6 === 0;
-          recordActivity({
-            accountId: acc.id,
-            accountName: acc.username,
-            platform: acc.platform,
-            source: "friend-reject",
-            target: r.peerName,
-            status: isFail ? "failed" : "success",
-            detail: isFail
-              ? "请求已过期，拒绝操作失败。"
-              : r.publicReasonZh ?? REJECT_TEMPLATES[(ai + i) % REJECT_TEMPLATES.length],
-            createdAt: seedTs(ai, 16, i * 6),
-          });
+      const frAccById = new Map(frAccounts.map((a) => [a.id, a]));
+      const decided = requests
+        .filter((r) => r.status === "accepted" || r.status === "rejected")
+        .slice()
+        .sort((a, b) => ((a.decidedAt ?? "") < (b.decidedAt ?? "") ? -1 : 1));
+      decided.forEach((r) => {
+        const acc = frAccById.get(r.accountId);
+        if (!acc) return;
+        const isApprove = r.status === "accepted";
+        recordActivity({
+          accountId: acc.id,
+          accountName: acc.username,
+          platform: acc.platform,
+          source: isApprove ? "friend-approve" : "friend-reject",
+          target: r.peerName,
+          status: "success",
+          detail: isApprove
+            ? r.welcomeZh ?? r.note ?? "已通过好友申请"
+            : r.publicReasonZh ?? r.note ?? "已拒绝好友申请",
+          createdAt: r.decidedAt ?? r.requestedAt,
         });
       });
     } catch (err) {
