@@ -34,7 +34,7 @@ import {
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
 import {
-  PLATFORMS, PLATFORM_CHIP, SUBTYPE_LABEL, STATUS_LABEL, STATUS_CLS,
+  PLATFORMS, PLATFORM_CHIP, STATUS_LABEL, STATUS_CLS,
   EXEC_STATE_LABEL, EXEC_STATE_CLS, getExecState, isForeverTask,
   TASK_CATEGORY_LABEL, TASK_CATEGORY_CLS, getTaskCategory,
   type Platform, type TaskStatus, type ExecState, type TaskRow, type TaskTemplate, type TaskCategory,
