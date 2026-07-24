@@ -26,6 +26,10 @@ export interface TaskRow {
   draft?: Record<string, unknown>;
   /** 是否被手动终止 */
   aborted?: boolean;
+  /** 任务来源：私信/好友通过/好友拒绝等手动运营台账 */
+  source?: "dm" | "friend-approve" | "friend-reject";
+  /** 手动台账任务对应的托管账号 ID */
+  sourceAccountId?: string;
 }
 
 export type ExecState = "completed" | "running" | "pending" | "aborted";
