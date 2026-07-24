@@ -163,12 +163,13 @@ function TaskListPage() {
               <Search className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
               <Input value={tKeyword} onChange={(e) => setTKeyword(e.target.value)} placeholder="搜索任务名称 / ID" className="h-8 pl-8 text-xs" />
             </div>
-            <Select value={tSubtype} onValueChange={(v) => setTSubtype(v as typeof tSubtype)}>
-              <SelectTrigger className="h-8 w-[140px] text-xs"><SelectValue placeholder="类型" /></SelectTrigger>
+            <Select value={tCategory} onValueChange={(v) => setTCategory(v as typeof tCategory)}>
+              <SelectTrigger className="h-8 w-[160px] text-xs"><SelectValue placeholder="任务类型" /></SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">全部类型</SelectItem>
-                <SelectItem value="nurture">周期性</SelectItem>
-                <SelectItem value="action">单次触达</SelectItem>
+                <SelectItem value="all">全部任务类型</SelectItem>
+                {(Object.keys(TASK_CATEGORY_LABEL) as TaskCategory[]).map((c) => (
+                  <SelectItem key={c} value={c}>{TASK_CATEGORY_LABEL[c]}</SelectItem>
+                ))}
               </SelectContent>
             </Select>
             <Select value={tPlatform} onValueChange={(v) => setTPlatform(v as typeof tPlatform)}>
