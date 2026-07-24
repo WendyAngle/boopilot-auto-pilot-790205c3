@@ -204,6 +204,8 @@ export function ensureActivityTasksSeeded() {
       const dmRecords: Array<{
         accId: string;
         peerName: string;
+        peerHandle: string;
+        peerAvatar: string;
         text: string;
         status: "success" | "failed";
         time: string;
@@ -217,6 +219,8 @@ export function ensureActivityTasksSeeded() {
           dmRecords.push({
             accId: conv.accountId,
             peerName: conv.peerName,
+            peerHandle: conv.peerHandle,
+            peerAvatar: conv.peerAvatar,
             text: m.sourceZh ?? m.text,
             status: st,
             time: m.time,
@@ -234,6 +238,8 @@ export function ensureActivityTasksSeeded() {
           platform: acc.platform,
           source: "dm",
           target: r.peerName,
+          peerHandle: r.peerHandle,
+          peerAvatar: r.peerAvatar,
           status: r.status,
           detail: r.status === "failed" && r.failReason
             ? `${r.text}（${r.failReason}）`
