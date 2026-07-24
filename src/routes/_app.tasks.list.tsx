@@ -58,6 +58,7 @@ const CATEGORY_ICON: Record<TaskCategory, LucideIcon> = {
   "friend-approve": UserCheck,
   "friend-reject": UserX,
   dm: MessageCircle,
+  coview: MonitorPlay,
 };
 const STATUS_ICON: Record<TaskStatus, LucideIcon> = {
   pending: Clock3, running: PlayCircle, success: CheckCircle2, failed: XCircle, partial: PauseCircle,
