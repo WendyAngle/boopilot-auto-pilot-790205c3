@@ -572,8 +572,42 @@ function FriendsPage() {
                       请求账号：{activeAccount.username} · {activeAccount.platform}
                     </div>
                   </div>
+                  {(() => {
+                    const taskId =
+                      active.status === "accepted"
+                        ? approveTaskId
+                        : active.status === "rejected"
+                          ? rejectTaskId
+                          : undefined;
+                    if (!taskId) return null;
+                    const label =
+                      active.status === "accepted" ? "查看通过任务" : "查看拒绝任务";
+                    const tip =
+                      active.status === "accepted"
+                        ? "该账号所有好友通过记录已归档到任务列表，点击查看"
+                        : "该账号所有好友拒绝记录已归档到任务列表，点击查看";
+                    return (
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button
+                            asChild
+                            size="sm"
+                            variant="ghost"
+                            className="h-8 shrink-0 gap-1 px-2 text-xs text-muted-foreground hover:text-primary"
+                          >
+                            <Link to="/tasks/$taskId" params={{ taskId }}>
+                              <ScrollText className="h-3.5 w-3.5" />
+                              {label}
+                            </Link>
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>{tip}</TooltipContent>
+                      </Tooltip>
+                    );
+                  })()}
                 </div>
               </div>
+
 
               <ScrollArea className="flex-1">
                 <div className="space-y-4 p-4">
