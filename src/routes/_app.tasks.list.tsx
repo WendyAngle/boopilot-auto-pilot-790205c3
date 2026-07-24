@@ -535,6 +535,10 @@ function TaskDetailDialog({ task, onClose }: { task: TaskRow | null; onClose: ()
       </Dialog>
     );
   }
+  // 活动台账类（私信 / 通过好友申请 / 拒绝好友申请）走专用视图
+  if (task.source) {
+    return <ActivityTaskDetailDialog task={task} onClose={onClose} />;
+  }
   const d = (task.draft ?? {}) as Record<string, unknown>;
   const has = Object.keys(d).length > 0;
   const get = <T,>(k: string, fb: T): T => (d[k] === undefined || d[k] === null ? fb : (d[k] as T));
