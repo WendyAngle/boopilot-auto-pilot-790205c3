@@ -131,6 +131,8 @@ export function recordActivity(params: {
   platform: Platform;
   source: ActivitySource;
   target: string;
+  peerHandle?: string;
+  peerAvatar?: string;
   status: "success" | "failed";
   detail?: string;
   createdAt?: string;
@@ -146,6 +148,8 @@ export function recordActivity(params: {
     platform: params.platform,
     action: ACTIVITY_ACTION_LABEL[params.source],
     target: params.target,
+    peerHandle: params.peerHandle,
+    peerAvatar: params.peerAvatar,
     status: params.status,
     createdAt: params.createdAt ?? fmtNow(),
     detail: params.detail,
