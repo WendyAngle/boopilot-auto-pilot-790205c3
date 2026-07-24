@@ -103,6 +103,16 @@ function MessagesPage() {
     (a) => a.id === (activeConv?.accountId ?? activeAccountId),
   );
 
+  // 用于跳转到 任务列表 · 该账号私信任务详情
+  const tasksAll = useTasks();
+  const dmTaskIdByAccount = useMemo(() => {
+    const m = new Map<string, string>();
+    tasksAll.forEach((t) => {
+      if (t.source === "dm" && t.sourceAccountId) m.set(t.sourceAccountId, t.id);
+    });
+    return m;
+  }, [tasksAll]);
+
   const toggleStar = (convId: string) => {
     let nextStarred = false;
     setConversations((prev) =>
