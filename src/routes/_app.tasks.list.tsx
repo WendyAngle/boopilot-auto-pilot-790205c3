@@ -10,7 +10,9 @@ import {
   MessageCircle, UserCheck, UserX, type LucideIcon,
 } from "lucide-react";
 import { UseTemplateDialog } from "@/components/use-template-dialog";
-import { ensureActivityTasksSeeded } from "@/lib/activity-tasks";
+import { ensureActivityTasksSeeded, useActivitySubtasks, ACTIVITY_SOURCE_LABEL } from "@/lib/activity-tasks";
+import { PLATFORM_META } from "@/lib/managed-account-mock";
+import { User2, AtSign, ArrowRight } from "lucide-react";
 
 ensureActivityTasksSeeded();
 
@@ -533,6 +535,10 @@ function TaskDetailDialog({ task, onClose }: { task: TaskRow | null; onClose: ()
       </Dialog>
     );
   }
+  // 活动台账类（私信 / 通过好友申请 / 拒绝好友申请）走专用视图
+  if (task.source) {
+    return <ActivityTaskDetailDialog task={task} onClose={onClose} />;
+  }
   const d = (task.draft ?? {}) as Record<string, unknown>;
   const has = Object.keys(d).length > 0;
   const get = <T,>(k: string, fb: T): T => (d[k] === undefined || d[k] === null ? fb : (d[k] as T));
@@ -625,6 +631,162 @@ function TaskDetailDialog({ task, onClose }: { task: TaskRow | null; onClose: ()
         </div>
         <DialogFooter className="border-t px-6 py-3">
           <Button variant="outline" onClick={onClose}>关闭</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+function ActivityTaskDetailDialog({ task, onClose }: { task: TaskRow; onClose: () => void }) {
+  const navigate = useNavigate();
+  const subs = useActivitySubtasks(task.id);
+  const platform = task.platforms[0];
+  const platformMeta = PLATFORM_META[platform];
+  const executorName = subs[0]?.accountName ?? "—";
+  const sourceLabel = task.source ? ACTIVITY_SOURCE_LABEL[task.source] : "";
+
+  const stats = {
+    total: subs.length,
+    done: subs.filter((s) => s.status === "success").length,
+    failed: subs.filter((s) => s.status === "failed").length,
+  };
+  const successRate = stats.total === 0 ? "—" : `${Math.round((stats.done / stats.total) * 100)}%`;
+  const preview = subs.slice(0, 5);
+
+  return (
+    <Dialog open onOpenChange={(o) => !o && onClose()}>
+      <DialogContent className="max-w-3xl gap-0 p-0">
+        <DialogHeader className="space-y-1 border-b px-6 py-4">
+          <DialogTitle className="flex items-center gap-2 text-base">
+            <Info className="h-4 w-4 text-primary" />任务详情 - {task.name}
+          </DialogTitle>
+          <DialogDescription className="font-mono text-xs">{task.id}</DialogDescription>
+        </DialogHeader>
+        <div className="max-h-[65vh] space-y-4 overflow-y-auto px-6 py-4">
+          {/* 执行账号 */}
+          <div className="rounded-lg border border-dashed border-border/70 bg-muted/30 px-3 py-2.5">
+            <div className="mb-1.5 text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
+              执行账号（我方托管账号）
+            </div>
+            <div className="flex flex-wrap items-center gap-2 text-sm">
+              <div className={cn(
+                "flex h-5 w-5 items-center justify-center rounded text-[10px] font-semibold",
+                platformMeta?.cls,
+              )}>
+                {platformMeta?.letter}
+              </div>
+              <span className="font-medium">{executorName}</span>
+              <span className="text-muted-foreground">·</span>
+              <span className="text-muted-foreground">{platform}</span>
+              <Badge variant="outline" className="ml-auto text-[10px] font-normal">
+                {sourceLabel}
+              </Badge>
+            </div>
+          </div>
+
+          {/* 统计 */}
+          <div className="grid grid-cols-4 gap-2">
+            <StatBox label="动作总数" value={stats.total} />
+            <StatBox label="成功" value={stats.done} tone="success" />
+            <StatBox label="失败" value={stats.failed} tone="danger" />
+            <StatBox label="成功率" value={successRate} />
+          </div>
+
+          {/* 明细预览 */}
+          <div className="rounded-lg border">
+            <div className="flex items-center justify-between border-b bg-muted/20 px-3 py-2">
+              <div className="text-xs font-semibold">最近动作</div>
+              <div className="text-[11px] text-muted-foreground">
+                展示最近 {preview.length} 条 / 共 {subs.length} 条
+              </div>
+            </div>
+            {preview.length === 0 ? (
+              <div className="py-8 text-center text-xs text-muted-foreground">暂无记录</div>
+            ) : (
+              <Table className="[&_th]:whitespace-nowrap [&_td]:align-top">
+                <TableHeader>
+                  <TableRow className="hover:bg-transparent">
+                    <TableHead className="w-[130px] pl-3 text-xs">时间</TableHead>
+                    <TableHead className="w-[80px] text-xs">动作</TableHead>
+                    <TableHead className="min-w-[180px] text-xs">目标账号（对方）</TableHead>
+                    <TableHead className="min-w-[220px] text-xs">内容 / 说明</TableHead>
+                    <TableHead className="w-[80px] pr-3 text-xs">结果</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {preview.map((s) => (
+                    <TableRow key={s.id} className="border-b-border/40">
+                      <TableCell className="pl-3 py-2 font-mono text-[11px] tabular-nums text-muted-foreground">
+                        {s.createdAt}
+                      </TableCell>
+                      <TableCell className="py-2 text-xs">{s.action}</TableCell>
+                      <TableCell className="py-2">
+                        <div className="flex items-center gap-2">
+                          {s.peerAvatar ? (
+                            <img src={s.peerAvatar} alt="" className="h-5 w-5 shrink-0 rounded-full border border-border/60" loading="lazy" />
+                          ) : (
+                            <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full border border-border/60 bg-muted text-muted-foreground">
+                              <User2 className="h-2.5 w-2.5" />
+                            </div>
+                          )}
+                          <div className="min-w-0 leading-tight">
+                            <div className="truncate text-xs">{s.target}</div>
+                            {s.peerHandle && (
+                              <div className="inline-flex items-center gap-0.5 text-[10px] text-muted-foreground">
+                                <AtSign className="h-2 w-2" />
+                                <span className="truncate">{s.peerHandle.replace(/^@/, "")}</span>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </TableCell>
+                      <TableCell className="py-2">
+                        {s.detail ? (
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <div className="max-w-[260px] truncate text-xs text-foreground/80">{s.detail}</div>
+                            </TooltipTrigger>
+                            <TooltipContent side="top" className="max-w-[420px] whitespace-pre-wrap break-words">
+                              {s.detail}
+                            </TooltipContent>
+                          </Tooltip>
+                        ) : (
+                          <span className="text-xs text-muted-foreground">—</span>
+                        )}
+                      </TableCell>
+                      <TableCell className="pr-3 py-2">
+                        <Badge variant="outline" className={cn(
+                          "text-[10px] font-normal",
+                          s.status === "success"
+                            ? "bg-success/10 text-success border-success/30"
+                            : "bg-destructive/10 text-destructive border-destructive/30",
+                        )}>
+                          {s.status === "success" ? "成功" : "失败"}
+                        </Badge>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            )}
+          </div>
+        </div>
+        <DialogFooter className="flex items-center justify-between gap-2 border-t px-6 py-3 sm:justify-between">
+          <span className="text-[11px] text-muted-foreground">
+            该任务为手动运营台账，明细来自 {sourceLabel} 模块
+          </span>
+          <div className="flex items-center gap-2">
+            <Button variant="outline" onClick={onClose}>关闭</Button>
+            <Button
+              onClick={() => {
+                onClose();
+                navigate({ to: "/tasks/$taskId", params: { taskId: task.id } });
+              }}
+              className="gap-1"
+            >
+              查看完整任务台账<ArrowRight className="h-3.5 w-3.5" />
+            </Button>
+          </div>
         </DialogFooter>
       </DialogContent>
     </Dialog>
