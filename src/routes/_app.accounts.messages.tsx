@@ -672,6 +672,19 @@ function ChatWindow({
             {conv.peerHandle} · 通过账号「{accountName}」({accountPlatform})
           </div>
         </div>
+        {dmTaskId && (
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button asChild size="sm" variant="ghost" className="h-8 gap-1 px-2 text-xs text-muted-foreground hover:text-primary">
+                <Link to="/tasks/$taskId" params={{ taskId: dmTaskId }}>
+                  <ScrollText className="h-3.5 w-3.5" />
+                  查看私信任务
+                </Link>
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>该账号所有私信发送记录已归档到任务列表，点击查看</TooltipContent>
+          </Tooltip>
+        )}
         <Tooltip>
           <TooltipTrigger asChild>
             <Button
