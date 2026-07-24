@@ -107,7 +107,7 @@ function TaskListPage() {
       if (tExec !== "all" && getExecState(t) !== tExec) return false;
       return true;
     });
-  }, [tasks, tKeyword, tSubtype, tPlatform, tResult, tExec]);
+  }, [tasks, tKeyword, tCategory, tPlatform, tResult, tExec]);
 
   const pageSize = 10;
   const [taskPage, setTaskPage] = useState(1);
