@@ -10,7 +10,9 @@ import {
   MessageCircle, UserCheck, UserX, type LucideIcon,
 } from "lucide-react";
 import { UseTemplateDialog } from "@/components/use-template-dialog";
-import { ensureActivityTasksSeeded } from "@/lib/activity-tasks";
+import { ensureActivityTasksSeeded, useActivitySubtasks, ACTIVITY_SOURCE_LABEL } from "@/lib/activity-tasks";
+import { PLATFORM_META } from "@/lib/managed-account-mock";
+import { User2, AtSign, ArrowRight } from "lucide-react";
 
 ensureActivityTasksSeeded();
 
