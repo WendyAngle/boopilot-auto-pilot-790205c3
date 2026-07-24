@@ -43,8 +43,12 @@ export interface ActivitySubTask {
   accountName: string;
   platform: Platform;
   action: string;
-  /** 对方昵称/账号，用于「目标」列展示 */
+  /** 对方昵称（目标账号显示名） */
   target: string;
+  /** 对方在平台上的 handle，如 @emily.c */
+  peerHandle?: string;
+  /** 对方头像 URL */
+  peerAvatar?: string;
   status: "success" | "failed";
   createdAt: string;
   /** 摘要：私信内容 / 欢迎语 / 拒绝说明 */
