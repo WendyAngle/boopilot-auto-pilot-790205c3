@@ -513,13 +513,14 @@ export function UseTemplateDialog({ template, task, open, onOpenChange, onViewDe
     if (draft.reachTenants.length) reachParts.push(`租户：${draft.reachTenants.join("、")}`);
     if (draft.reachAccounts.length) reachParts.push(`特定账号：${draft.reachAccounts.length} 个`);
     lines.push(`指定账号：${reachParts.length ? reachParts.join(" ｜ ") : "未指定"}`);
+    const sessionPart = `，时长 ${draft.sessionDuration} ${draft.sessionDurationUnit === "hour" ? "小时" : "分钟"}`;
     if (draft.execMode === "now") {
-      lines.push("执行方式：立即执行");
+      lines.push(`执行方式：立即执行${sessionPart}`);
     } else if (draft.execMode === "scheduled") {
       lines.push(
         draft.scheduledMode === "active"
-          ? "执行方式：指定时间开始执行（账号活跃时间）"
-          : `执行方式：指定时间开始执行 ${draft.scheduledDate} ${draft.scheduledTime}`,
+          ? `执行方式：指定时间开始执行（账号活跃时间）${sessionPart}`
+          : `执行方式：指定时间开始执行 ${draft.scheduledDate} ${draft.scheduledTime}${sessionPart}`,
       );
     } else {
       const weekPart = draft.recurFreq === "weekly" ? `（${draft.recurWeekdays.join("、") || "未选"}）` : "";
@@ -1228,6 +1229,24 @@ export function UseTemplateDialog({ template, task, open, onOpenChange, onViewDe
                             )}
                           </div>
                         </RadioGroup>
+                        <div className="flex flex-wrap items-center gap-2 pt-1">
+                          <span className="w-16 text-muted-foreground">时长</span>
+                          <Input
+                            type="number"
+                            min={1}
+                            value={draft.sessionDuration}
+                            onChange={(e) => update("sessionDuration", Math.max(1, parseInt(e.target.value || "1", 10)))}
+                            className="h-7 w-20 text-xs"
+                          />
+                          <Select value={draft.sessionDurationUnit} onValueChange={(v) => update("sessionDurationUnit", v as "min" | "hour")}>
+                            <SelectTrigger className="h-7 w-20 text-xs"><SelectValue /></SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="min">分钟</SelectItem>
+                              <SelectItem value="hour">小时</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <span className="text-[11px] text-muted-foreground">每次养号时长</span>
+                        </div>
                       </div>
                     )}
                   </label>
