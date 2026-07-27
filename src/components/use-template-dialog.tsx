@@ -1228,6 +1228,24 @@ export function UseTemplateDialog({ template, task, open, onOpenChange, onViewDe
                             )}
                           </div>
                         </RadioGroup>
+                        <div className="flex flex-wrap items-center gap-2 pt-1">
+                          <span className="w-16 text-muted-foreground">时长</span>
+                          <Input
+                            type="number"
+                            min={1}
+                            value={draft.sessionDuration}
+                            onChange={(e) => update("sessionDuration", Math.max(1, parseInt(e.target.value || "1", 10)))}
+                            className="h-7 w-20 text-xs"
+                          />
+                          <Select value={draft.sessionDurationUnit} onValueChange={(v) => update("sessionDurationUnit", v as "min" | "hour")}>
+                            <SelectTrigger className="h-7 w-20 text-xs"><SelectValue /></SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="min">分钟</SelectItem>
+                              <SelectItem value="hour">小时</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <span className="text-[11px] text-muted-foreground">每次养号时长</span>
+                        </div>
                       </div>
                     )}
                   </label>
