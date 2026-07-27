@@ -2575,7 +2575,7 @@ function ImportAccountsDialog({
 
   const handleDownloadTemplate = () => {
     const headers = [...REQUIRED_FIELDS.map((f) => `${f}(必填)`), ...OPTIONAL_FIELDS.map((f) => `${f}(选填)`)];
-    const sample = ["Facebook", "demo_user", "1000123456789", "Pass@123", "JBSWY3DPEHPK3PXP", "云机", "美国", "US / California", "+1 555-0100", "demo@example.com", "示例账号", "c_user=1000xxx; xs=xxx; datr=xxx"];
+    const sample = ["Facebook", "demo_user", "1000123456789", "Pass@123", "JBSWY3DPEHPK3PXP", "云机", "美国", "US / California", "+1 555-0100", "demo@example.com", "MailPwd@123", "示例账号", "c_user=1000xxx; xs=xxx; datr=xxx"];
     const csv = headers.join(",") + "\n" + sample.join(",") + "\n";
     const blob = new Blob([`\ufeff${csv}`], { type: "text/csv;charset=utf-8;" });
     const url = URL.createObjectURL(blob);
