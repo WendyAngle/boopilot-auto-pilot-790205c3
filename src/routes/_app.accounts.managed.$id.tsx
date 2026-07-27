@@ -436,15 +436,6 @@ function BasicInfoCard({ account, derived }: { account: ManagedAccount; derived:
       ),
     },
     {
-      label: "登录密码",
-      value: (
-        <span className="flex items-center gap-2">
-          <Mono>{derived.password}</Mono>
-          <CopyBtn text={derived.password} />
-        </span>
-      ),
-    },
-    {
       label: "负责人",
       value: editable(
         "ownerName",
