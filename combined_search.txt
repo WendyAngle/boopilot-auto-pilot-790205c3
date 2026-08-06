@@ -1,0 +1,125 @@
+src/components/ui/alert-dialog.tsx:19:      "fixed inset-0 z-50 bg-black/80 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0",
+src/components/ui/alert-dialog.tsx:37:        "fixed left-[50%] top-[50%] z-50 grid w-full max-w-lg translate-x-[-50%] translate-y-[-50%] gap-4 border bg-background p-6 shadow-lg duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 sm:rounded-lg",
+src/components/ui/chart.tsx:6:// Format: { THEME_NAME: CSS_SELECTOR }
+src/components/ui/chart.tsx:76:            ([theme, prefix]) => `
+src/components/ui/chart.tsx:77:${prefix} [data-chart=${id}] {
+src/components/ui/dialog.tsx:24:      "fixed inset-0 z-50 bg-black/80  data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0",
+src/components/ui/dialog.tsx:41:        "fixed left-[50%] top-[50%] z-50 grid w-full max-w-lg translate-x-[-50%] translate-y-[-50%] gap-4 border bg-background p-6 shadow-lg duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 sm:rounded-lg",
+src/components/ui/drawer.tsx:26:    className={cn("fixed inset-0 z-50 bg-black/80", className)}
+src/components/ui/drawer.tsx:41:        "fixed inset-x-0 bottom-0 z-50 mt-24 flex h-auto flex-col rounded-t-[10px] border bg-background",
+src/components/ui/sheet.tsx:24:      "fixed inset-0 z-50 bg-black/80  data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0",
+src/components/ui/sheet.tsx:34:  "fixed z-50 gap-4 bg-background p-6 shadow-lg transition ease-in-out data-[state=closed]:duration-300 data-[state=open]:duration-500 data-[state=open]:animate-in data-[state=closed]:animate-out",
+src/components/ui/sidebar.tsx:235:            "fixed inset-y-0 z-10 hidden h-svh w-(--sidebar-width) transition-[left,right,width] duration-200 ease-linear md:flex",
+src/components/use-template-dialog.tsx:503:  const estimatedHours = Math.max(0.5, +(totalOps / 350).toFixed(1));
+src/lib/auth.ts:3:const PWD_KEY_PREFIX = "boopilot.pwd.";
+src/lib/auth.ts:81:  return localStorage.getItem(PWD_KEY_PREFIX + username) ?? fallback;
+src/lib/auth.ts:101:  localStorage.setItem(PWD_KEY_PREFIX + u.username, newPwd);
+src/lib/billing-discounts.ts:192:  return `${(d * 10).toFixed(1)} 折`;
+src/lib/friends-mock.ts:165:      const suffix = i === 0 ? " Jr." : "";
+src/lib/friends-mock.ts:166:      const handleSuffix = i === 0 ? "_jr" : "_v2";
+src/lib/friends-mock.ts:167:      const peerName = seed.name + suffix;
+src/lib/friends-mock.ts:168:      const peerHandle = seed.handle + handleSuffix;
+src/routes/_app.accounts.friends.tsx:10:  Languages,
+src/routes/_app.accounts.friends.tsx:647:                            <Languages className="h-3 w-3" />
+src/routes/_app.accounts.managed.$id.tsx:291:  if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}M`;
+src/routes/_app.accounts.managed.$id.tsx:292:  if (n >= 10_000) return `${(n / 1_000).toFixed(1)}K`;
+src/routes/_app.accounts.managed.$id.tsx:1495:  "--fp-language": "en-US",
+src/routes/_app.accounts.managed.$id.tsx:1543:      totp: `JDDQTMFLHFIXSI3VMYBT266CYHJ${(h % 9000) + 1000}`,
+src/routes/_app.accounts.managed.$id.tsx:1707:            <span><b>{(account.following / 1000).toFixed(1)}K</b> <span className="text-muted-foreground">正在关注</span></span>
+src/routes/_app.accounts.managed.$id.tsx:1708:            <span><b>{(account.followers / 1000).toFixed(1)}K</b> <span className="text-muted-foreground">粉丝</span></span>
+src/routes/_app.accounts.managed.$id.tsx:1709:            <span><b>{(account.likes / 1000).toFixed(1)}K</b> <span className="text-muted-foreground">获赞</span></span>
+src/routes/_app.accounts.managed.$id.tsx:1758:            <span><b>{(account.likes / 1000).toFixed(0)}</b> 帖子</span>
+src/routes/_app.accounts.managed.$id.tsx:1759:            <span><b>{(account.followers / 1000).toFixed(1)}K</b> 粉丝</span>
+src/routes/_app.accounts.managed.$id.tsx:1760:            <span><b>{(account.following / 1000).toFixed(1)}K</b> 正在关注</span>
+src/routes/_app.accounts.managed.$id.tsx:1811:            <span><b>{(account.following / 1000).toFixed(1)}K</b> <span className="text-zinc-400">正在关注</span></span>
+src/routes/_app.accounts.managed.$id.tsx:1812:            <span><b>{(account.followers / 1000).toFixed(1)}K</b> <span className="text-zinc-400">关注者</span></span>
+src/routes/_app.accounts.managed.index.tsx:165:  if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}M`;
+src/routes/_app.accounts.managed.index.tsx:166:  if (n >= 1_000) return `${(n / 1_000).toFixed(1)}K`;
+src/routes/_app.accounts.messages.tsx:3:import { Search, Send, Sparkles, Eraser, Languages, Loader2, CheckCheck, MessageSquare, AlertCircle, RotateCw, Star, ScrollText } from "lucide-react";
+src/routes/_app.accounts.messages.tsx:766:              <Languages className="h-3 w-3" />
+src/routes/_app.accounts.messages.tsx:834:                <Languages className="h-3 w-3" />
+src/routes/_app.accounts.messages.tsx:914:              <Languages className="h-3 w-3" />
+src/routes/_app.accounts.messages.tsx:923:              <Languages className="h-3 w-3" />
+src/routes/_app.agents.list.tsx:22:  Languages,
+src/routes/_app.agents.list.tsx:135:  lang: Languages,
+src/routes/_app.agents.list.tsx:205:    icon: Languages,
+src/routes/_app.agents.list.tsx:585:          <StatCard title="本月费用" value={`$${stats.cost.toFixed(2)}`} icon={DollarSign} tone="primary" />
+src/routes/_app.agents.list.tsx:1071:            {isDraft ? "—" : `$${agent.costThisMonth.toFixed(2)}`}
+src/routes/_app.agents.list.tsx:1484:                        {temperature[0].toFixed(2)}
+src/routes/_app.agents.list.tsx:1608:                    {temperature[0].toFixed(2)}
+src/routes/_app.agents.workspace.tsx:33:type CountMode = "range" | "fixed";
+src/routes/_app.agents.workspace.tsx:44:  countFixed?: number;
+src/routes/_app.agents.workspace.tsx:119:  if (nm) { d.countMode = "fixed"; d.countFixed = parseInt(nm[1], 10); }
+src/routes/_app.agents.workspace.tsx:131:  if (d.countMode === "fixed" && d.countFixed != null) parts.push(`【执行次数】每账号 ${d.countFixed} 次`);
+src/routes/_app.agents.workspace.tsx:142:  if (d.countMode === "fixed" && d.countFixed) return d.countFixed;
+src/routes/_app.agents.workspace.tsx:508:          <RadioGroupItem value="fixed" id="fixed" />限定
+src/routes/_app.agents.workspace.tsx:534:            value={draft.countFixed ?? ""}
+src/routes/_app.agents.workspace.tsx:535:            onChange={(e) => onChange({ countFixed: e.target.value ? Number(e.target.value) : undefined })}
+src/routes/_app.agents.workspace.tsx:733:          countMode: local.countMode, countMin: local.countMin, countMax: local.countMax, countFixed: local.countFixed,
+src/routes/_app.ai.materials.tsx:24:  ScanSearch,
+src/routes/_app.ai.materials.tsx:252:      if (b >= 1024 ** 3) return `${(b / 1024 ** 3).toFixed(2)} GB`;
+src/routes/_app.ai.materials.tsx:253:      if (b >= 1024 ** 2) return `${(b / 1024 ** 2).toFixed(1)} MB`;
+src/routes/_app.ai.materials.tsx:254:      if (b >= 1024) return `${(b / 1024).toFixed(0)} KB`;
+src/routes/_app.ai.materials.tsx:628:            <ScanSearch className="h-4 w-4" />
+src/routes/_app.ai.materials.tsx:1302:          size: `${(p.file.size / 1024 / 1024).toFixed(1)} MB`,
+src/routes/_app.ai.materials.tsx:1403:                          <ScanSearch className="h-3 w-3" /> 疑似重复
+src/routes/_app.ai.materials.tsx:1855:            <ScanSearch className="h-4 w-4" /> 智能去重
+src/routes/_app.ai.remix.tsx:92:function uid(prefix: string) {
+src/routes/_app.ai.remix.tsx:93:  return `${prefix}-${Math.random().toString(36).slice(2, 9)}`;
+src/routes/_app.ai.video.tsx:54:const VOICE_LANGUAGES = [
+src/routes/_app.ai.video.tsx:616:                  <IconSelect icon={<Globe2 className="h-4 w-4" />} value={voiceLang} onChange={setVoiceLang} options={VOICE_LANGUAGES} />
+src/routes/_app.billing.discounts.tsx:145:      const next = Math.min(1, Math.max(0.1, +(cur + shiftDelta).toFixed(2)));
+src/routes/_app.billing.discounts.tsx:149:      `已对「${PLAN_META[shiftPlan].label}」全场${shiftDelta >= 0 ? "提价" : "让利"} ${Math.abs(shiftDelta * 10).toFixed(1)} 折`,
+src/routes/_app.billing.discounts.tsx:401:                  {(shiftDelta * 10).toFixed(1)} 折（{shiftDelta >= 0 ? "提价" : "让利"}）
+src/routes/_app.billing.discounts.tsx:408:                  onValueChange={([v]) => setShiftDelta(+v.toFixed(2))}
+src/routes/_app.billing.discounts.tsx:546:                              setDiscount(editFn.key, p, +nv.toFixed(2))
+src/routes/_app.billing.discounts.tsx:560:                                Math.min(1, Math.max(0.1, +Number(e.target.value).toFixed(2))),
+src/routes/_app.billing.discounts.tsx:653:            onValueChange={([v]) => setLocal(+v.toFixed(2))}
+src/routes/_app.billing.discounts.tsx:662:            onChange={(e) => setLocal(Math.min(1, Math.max(0.1, +Number(e.target.value).toFixed(2))))}
+src/routes/_app.billing.discounts.tsx:667:          基准 {base} 积分 / {unit} × {(local * 10).toFixed(1)} 折 ={" "}
+src/routes/_app.billing.discounts.tsx:857:  return Math.min(1, Math.max(0.1, +Number(n).toFixed(2)));
+src/routes/_app.billing.discounts.tsx:882:        onValueChange={([v]) => onChange(+v.toFixed(2))}
+src/routes/_app.billing.plans.tsx:213:                  {((1 - p.yearlyPrice / (p.monthlyPrice * 12)) * 100).toFixed(0)}% 优惠）
+src/routes/_app.billing.plans.tsx:297:                {((1 - p.yearlyPrice / (p.monthlyPrice * 12)) * 100).toFixed(0)}% 优惠）
+src/routes/_app.system.ai-presets.tsx:1864:                    <span className="text-xs">{(bulkFile.size / 1024).toFixed(1)} KB · 点击替换</span>
+src/routes/_app.system.menus.tsx:108:  affix: boolean;
+src/routes/_app.system.menus.tsx:145:    affix: true,
+src/routes/_app.system.menus.tsx:164:    affix: false,
+src/routes/_app.system.menus.tsx:183:    affix: false,
+src/routes/_app.system.menus.tsx:202:    affix: false,
+src/routes/_app.system.menus.tsx:217:    affix: false,
+src/routes/_app.system.menus.tsx:232:    affix: false,
+src/routes/_app.system.menus.tsx:251:    affix: false,
+src/routes/_app.system.menus.tsx:270:    affix: false,
+src/routes/_app.system.menus.tsx:289:    affix: false,
+src/routes/_app.system.menus.tsx:308:    affix: false,
+src/routes/_app.system.menus.tsx:327:    affix: false,
+src/routes/_app.system.menus.tsx:346:    affix: false,
+src/routes/_app.system.menus.tsx:365:    affix: false,
+src/routes/_app.system.menus.tsx:384:    affix: false,
+src/routes/_app.system.menus.tsx:403:    affix: false,
+src/routes/_app.system.menus.tsx:422:    affix: false,
+src/routes/_app.system.menus.tsx:441:    affix: false,
+src/routes/_app.system.menus.tsx:460:    affix: false,
+src/routes/_app.system.menus.tsx:479:    affix: false,
+src/routes/_app.system.menus.tsx:498:    affix: false,
+src/routes/_app.system.menus.tsx:517:    affix: false,
+src/routes/_app.system.menus.tsx:536:    affix: false,
+src/routes/_app.system.menus.tsx:555:    affix: false,
+src/routes/_app.system.menus.tsx:570:    affix: false,
+src/routes/_app.system.menus.tsx:585:    affix: false,
+src/routes/_app.system.menus.tsx:604:    affix: false,
+src/routes/_app.system.menus.tsx:619:    affix: false,
+src/routes/_app.system.menus.tsx:638:    affix: false,
+src/routes/_app.system.menus.tsx:787:      affix: false,
+src/routes/_app.system.menus.tsx:1231:                  <YesNo value={form.affix} onChange={(v) => setForm({ ...form, affix: v })} />
+.workspace/.git/hooks/fsmonitor-watchman.sample:27:	    "Falling back to scanning...\n";
+.workspace/.git/hooks/fsmonitor-watchman.sample:72:		"Falling back to scanning...\n" if $? != 0;
+.workspace/.git/hooks/fsmonitor-watchman.sample:80:	"Falling back to scanning...\n";
+.workspace/.git/hooks/fsmonitor-watchman.sample:116:	"Falling back to scanning...\n" if $response eq "";
+.workspace/.git/hooks/fsmonitor-watchman.sample:118:	"Falling back to scanning...\n" unless $response =~ /^\{/;
+.workspace/.git/hooks/fsmonitor-watchman.sample:130:		    "Falling back to scanning...\n" if $? != 0;
+.workspace/.git/hooks/fsmonitor-watchman.sample:134:		"Falling back to scanning...\n" if $error;
+.workspace/.git/hooks/fsmonitor-watchman.sample:148:		"Falling back to scanning...\n" if $error;
+.workspace/.git/hooks/fsmonitor-watchman.sample:158:	"Falling back to scanning...\n" if $error;
+.workspace/.git/hooks/pre-rebase.sample:146: * A has one fix since it was merged up to "next".

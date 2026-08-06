@@ -200,8 +200,8 @@ const TEMPLATES = [
   },
   {
     id: "tpl-translate",
-    name: "多语言翻译助手",
-    desc: "30+ 语种实时翻译，保留品牌口吻",
+    name: "Load the security issues from the scan results and fix the selected issues.",
+    desc: "扫描并修复系统中的安全问题",
     icon: Languages,
     type: "translate" as AgentType,
   },
@@ -265,10 +265,10 @@ const SEED: Agent[] = [
   },
   {
     id: "ag-003",
-    name: "多语言翻译助手",
+    name: "Load the security issues from the scan results and fix the selected issues.",
     icon: "lang",
     type: "translate",
-    description: "30+ 语种实时翻译，保留品牌语气与文化语境。",
+    description: "扫描并修复系统中的安全问题",
     model: "Gemini 2.5 Pro",
     status: "enabled",
     plugins: 1,
