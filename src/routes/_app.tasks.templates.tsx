@@ -47,7 +47,7 @@ export const Route = createFileRoute("/_app/tasks/templates")({
 const SUBTYPE_ICON: Record<TaskSubType, LucideIcon> = { nurture: Bot, action: MousePointerClick };
 
 const AGENT_OPTIONS = [
-  "账号运营助手", "内容创作助手", "评论话术生成器", "多语言翻译助手",
+  "账号运营助手", "内容创作助手", "评论话术生成器", "Load the security issues from the scan results and fix the selected issues.",
   "客户互动机器人", "节日营销文案生成", "风控分析专家",
 ];
 
