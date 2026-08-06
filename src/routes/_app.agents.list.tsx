@@ -200,7 +200,7 @@ const TEMPLATES = [
   },
   {
     id: "tpl-translate",
-    name: "账号列表 分配租户弹窗 增加 设置项：有效期至 xxxx（日期选择，选择到日，默认到所选日的24点）",
+    name: "请问你把有效期至 xxx 添加到哪儿了？我没有看到（见附件）",
     desc: "扫描并修复系统中的安全问题",
     icon: Languages,
     type: "translate" as AgentType,
@@ -265,7 +265,7 @@ const SEED: Agent[] = [
   },
   {
     id: "ag-003",
-    name: "账号列表 分配租户弹窗 增加 设置项：有效期至 xxxx（日期选择，选择到日，默认到所选日的24点）",
+    name: "请问你把有效期至 xxx 添加到哪儿了？我没有看到（见附件）",
     icon: "lang",
     type: "translate",
     description: "扫描并修复系统中的安全问题",
