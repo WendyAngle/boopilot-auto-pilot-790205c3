@@ -1008,12 +1008,6 @@ function ManagedAccountsPage() {
             });
             setSelected([]);
           }}
-        />
-              description: `${selected.length} 个账号 → ${t.name}`,
-            });
-            setSelected([]);
-          }}
-        />
 
         <SimpleSelectDialog
           open={assignOwnerOpen}
