@@ -1,4 +1,6 @@
 import { useEffect, useState } from "react";
+import { format } from "date-fns";
+import { CalendarIcon } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -15,6 +17,14 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
+import { Calendar } from "@/components/ui/calendar";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { Label } from "@/components/ui/label";
+import { cn } from "@/lib/utils";
 import { ACTIVE_TENANTS } from "@/lib/managed-account-mock";
 import { getCurrentUser } from "@/lib/auth";
 import { getTenantScope } from "@/lib/tenant-scope";
@@ -23,6 +33,7 @@ import { getTenantScope } from "@/lib/tenant-scope";
  * 「分配租户」通用弹窗
  * - 可选项：与顶部租户选择器一致（受 allowedTenantNames 约束）
  * - 默认选中：当前顶部租户作用域；若为「全部租户」则取首个可选项
+ * - 新增：有效期至 设置项
  */
 export function AssignTenantDialog({
   open,
@@ -35,7 +46,7 @@ export function AssignTenantDialog({
   onOpenChange: (o: boolean) => void;
   count: number;
   entityLabel?: string;
-  onConfirm: (tenant: { id: string; name: string }) => void;
+  onConfirm: (tenant: { id: string; name: string; expiryDate?: Date }) => void;
 }) {
   const user = getCurrentUser();
   const allowed = user?.allowedTenantNames;
@@ -52,9 +63,13 @@ export function AssignTenantDialog({
   };
 
   const [value, setValue] = useState<string>(pickDefault);
+  const [expiryDate, setExpiryDate] = useState<Date | undefined>();
 
   useEffect(() => {
-    if (open) setValue(pickDefault());
+    if (open) {
+      setValue(pickDefault());
+      setExpiryDate(undefined);
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
 
@@ -67,18 +82,58 @@ export function AssignTenantDialog({
             将所选 <b>{count}</b> {entityLabel}分配到指定租户。
           </DialogDescription>
         </DialogHeader>
-        <Select value={value} onValueChange={setValue}>
-          <SelectTrigger>
-            <SelectValue placeholder="请选择租户" />
-          </SelectTrigger>
-          <SelectContent>
-            {visibleTenants.map((t) => (
-              <SelectItem key={t.id} value={t.id}>
-                {t.name}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        
+        <div className="space-y-4 py-2">
+          <div className="space-y-2">
+            <Label>目标租户</Label>
+            <Select value={value} onValueChange={setValue}>
+              <SelectTrigger>
+                <SelectValue placeholder="请选择租户" />
+              </SelectTrigger>
+              <SelectContent>
+                {visibleTenants.map((t) => (
+                  <SelectItem key={t.id} value={t.id}>
+                    {t.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="space-y-2">
+            <Label className="flex items-center justify-between">
+              有效期至
+              {expiryDate && (
+                <span className="text-[10px] text-muted-foreground font-normal">
+                  默认到所选日的 24:00
+                </span>
+              )}
+            </Label>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  variant={"outline"}
+                  className={cn(
+                    "w-full justify-start text-left font-normal",
+                    !expiryDate && "text-muted-foreground"
+                  )}
+                >
+                  <CalendarIcon className="mr-2 h-4 w-4" />
+                  {expiryDate ? format(expiryDate, "yyyy-MM-dd") : <span>选择过期日期 (可选)</span>}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="start">
+                <Calendar
+                  mode="single"
+                  selected={expiryDate}
+                  onSelect={setExpiryDate}
+                  initialFocus
+                />
+              </PopoverContent>
+            </Popover>
+          </div>
+        </div>
+
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)}>
             取消
@@ -88,7 +143,11 @@ export function AssignTenantDialog({
             onClick={() => {
               const t = visibleTenants.find((x) => x.id === value);
               if (!t) return;
-              onConfirm({ id: t.id, name: t.name });
+              onConfirm({ 
+                id: t.id, 
+                name: t.name, 
+                expiryDate: expiryDate ? new Date(expiryDate.setHours(23, 59, 59, 999)) : undefined 
+              });
             }}
           >
             分配
