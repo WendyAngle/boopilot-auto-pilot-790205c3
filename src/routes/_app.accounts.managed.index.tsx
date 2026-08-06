@@ -989,16 +989,12 @@ function ManagedAccountsPage() {
           </AlertDialogContent>
         </AlertDialog>
 
-        <SimpleSelectDialog
+        <AssignTenantDialog
           open={assignTenantOpen}
           onOpenChange={setAssignTenantOpen}
-          title="分配租户"
-          description={`将所选 ${selected.length} 个托管账号分配到指定租户。`}
-          options={ACTIVE_TENANTS.map((t) => ({ value: t.id, label: t.name }))}
-          confirmLabel="分配"
-          onConfirm={(v) => {
-            const t = ACTIVE_TENANTS.find((x) => x.id === v);
-            if (!t) return;
+          count={selected.length}
+          entityLabel="个托管账号"
+          onConfirm={(t) => {
             setRows((prev) =>
               prev.map((x) =>
                 selected.includes(x.id)
@@ -1008,6 +1004,11 @@ function ManagedAccountsPage() {
             );
             setAssignTenantOpen(false);
             toast.success("分配成功", {
+              description: `${selected.length} 个账号 → ${t.name}${t.expiryDate ? ` (有效期至 ${t.expiryDate.toLocaleDateString()})` : ""}`,
+            });
+            setSelected([]);
+          }}
+        />
               description: `${selected.length} 个账号 → ${t.name}`,
             });
             setSelected([]);
