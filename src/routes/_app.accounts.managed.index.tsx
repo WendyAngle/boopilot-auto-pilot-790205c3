@@ -52,6 +52,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { getCurrentUser } from "@/lib/auth";
+import { AssignTenantDialog } from "@/components/assign-tenant-dialog";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
