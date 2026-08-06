@@ -85,9 +85,12 @@ export function AssignTenantDialog({
         
         <div className="space-y-4 py-2">
           <div className="space-y-2">
-            <Label>目标租户</Label>
+            <Label className="flex items-center gap-1">
+              目标租户
+              <span className="text-destructive">*</span>
+            </Label>
             <Select value={value} onValueChange={setValue}>
-              <SelectTrigger>
+              <SelectTrigger className={cn(!value && "border-destructive/50")}>
                 <SelectValue placeholder="请选择租户" />
               </SelectTrigger>
               <SelectContent>
@@ -101,8 +104,11 @@ export function AssignTenantDialog({
           </div>
 
           <div className="space-y-2">
-            <Label className="flex items-center justify-between">
-              有效期至
+            <Label className="flex items-center justify-between gap-1">
+              <span className="flex items-center gap-1">
+                有效期至
+                <span className="text-destructive">*</span>
+              </span>
               {expiryDate && (
                 <span className="text-[10px] text-muted-foreground font-normal">
                   默认到所选日的 24:00
@@ -115,11 +121,11 @@ export function AssignTenantDialog({
                   variant={"outline"}
                   className={cn(
                     "w-full justify-start text-left font-normal",
-                    !expiryDate && "text-muted-foreground"
+                    !expiryDate && "text-muted-foreground border-destructive/50"
                   )}
                 >
                   <CalendarIcon className="mr-2 h-4 w-4" />
-                  {expiryDate ? format(expiryDate, "yyyy-MM-dd") : <span>选择过期日期 (可选)</span>}
+                  {expiryDate ? format(expiryDate, "yyyy-MM-dd") : <span>选择过期日期</span>}
                 </Button>
               </PopoverTrigger>
               <PopoverContent className="w-auto p-0" align="start">
@@ -139,14 +145,14 @@ export function AssignTenantDialog({
             取消
           </Button>
           <Button
-            disabled={!value}
+            disabled={!value || !expiryDate}
             onClick={() => {
               const t = visibleTenants.find((x) => x.id === value);
-              if (!t) return;
+              if (!t || !expiryDate) return;
               onConfirm({ 
                 id: t.id, 
                 name: t.name, 
-                expiryDate: expiryDate ? new Date(expiryDate.setHours(23, 59, 59, 999)) : undefined 
+                expiryDate: new Date(expiryDate.setHours(23, 59, 59, 999))
               });
             }}
           >
