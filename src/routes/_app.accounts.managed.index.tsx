@@ -1008,6 +1008,7 @@ function ManagedAccountsPage() {
             });
             setSelected([]);
           }}
+        />
 
         <SimpleSelectDialog
           open={assignOwnerOpen}
