@@ -200,7 +200,7 @@ const TEMPLATES = [
   },
   {
     id: "tpl-translate",
-    name: "请问你把有效期至 xxx 添加到哪儿了？我没有看到（见附件）",
+    name: "分配租户弹窗 ，两个编辑增加必填标识和必填校验",
     desc: "扫描并修复系统中的安全问题",
     icon: Languages,
     type: "translate" as AgentType,
@@ -265,7 +265,7 @@ const SEED: Agent[] = [
   },
   {
     id: "ag-003",
-    name: "请问你把有效期至 xxx 添加到哪儿了？我没有看到（见附件）",
+    name: "分配租户弹窗 ，两个编辑增加必填标识和必填校验",
     icon: "lang",
     type: "translate",
     description: "扫描并修复系统中的安全问题",
