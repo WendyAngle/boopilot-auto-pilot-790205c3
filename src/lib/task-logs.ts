@@ -134,11 +134,14 @@ export function buildLogs(t: TaskRow): LogRow[] {
     const pf = platformText(platform);
 
     // 每个账号子任务包含 2~3 个动作，覆盖整次任务的多种操作
+    // 社媒触达任务只做拓客类动作（私信/加好友/拉取列表等），不含关注、发帖、点赞、评论
+    const pool = isReach ? REACH_ACTION_TYPES : ACTION_TYPES;
     const actionCount = 2 + ((h >>> 21) % 2); // 2 或 3
     const actions: string[] = [];
     for (let a = 0; a < actionCount; a++) {
-      actions.push(ACTION_TYPES[((h >>> (3 + a * 4)) + a) % ACTION_TYPES.length]);
+      actions.push(pool[((h >>> (3 + a * 4)) + a) % pool.length]);
     }
+
 
     const sDispatch = SUCCESS_CODES.WORK_DISPATCH_SUCCEEDED;
     const sCreated = SUCCESS_CODES.ACTION_CREATED;
