@@ -370,7 +370,14 @@ export function UseTemplateDialog({ template, task, open, onOpenChange, onViewDe
         const groups = Array.isArray((saved as any).nurtureGroups) && (saved as any).nurtureGroups.length > 0
           ? (saved as any).nurtureGroups as NurtureGroup[]
           : [makeNurtureGroup()];
-        setDraft({ ...saved, nurtureGroups: groups });
+        setDraft({
+          ...DEFAULT_DRAFT_PARTIAL,
+          name: task.name,
+          platforms: [...task.platforms],
+          perAccount: Math.max(1, Math.round(task.total / Math.max(1, task.platforms.length || 1))),
+          ...(saved as Partial<DraftState>),
+          nurtureGroups: groups,
+        } as DraftState);
       } else {
         setDraft({
           ...DEFAULT_DRAFT_PARTIAL,
