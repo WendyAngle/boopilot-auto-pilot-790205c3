@@ -98,12 +98,20 @@ function mkRow(
   };
 }
 
+// 社媒触达（拓客）任务的动作池：不含 follow_user / like_post / comment_post / post_create / share_post
+export const REACH_ACTION_TYPES = [
+  "gather_friend_list", "gather_unread_message", "visit_no_target",
+  "send_message", "add_friend",
+] as const;
+
 export function buildLogs(t: TaskRow): LogRow[] {
   const rows: LogRow[] = [];
+  const isReach = t.category === "social-reach";
   const total = t.total;
   const done = t.done;
   const failed = t.failed;
   const running = t.status === "running" ? Math.min(2, total - done - failed) : 0;
+
   const baseDate = (t.createdAt.split(" ")[0] || "2026-04-22");
   const [bh, bm, bs] = (t.createdAt.split(" ")[1] || "14:12:00").split(":").map(Number);
   
