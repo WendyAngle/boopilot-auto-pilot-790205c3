@@ -141,15 +141,23 @@ function buildSubTasks(t: TaskRow): SubTask[] {
   for (let i = 0; i < total; i++) {
     const h = hash(`${t.id}|${i}`);
     const platform = t.platforms[h % t.platforms.length];
-    // 社媒触达 → 加好友 / 私信；周期性任务 → 培育；单次触达任务 → 触达
-    const reachAction = (t.draft as Record<string, unknown> | undefined)?.reachAction;
-    const action = t.category === "social-reach"
-      ? (typeof reachAction === "string" ? reachAction : "私信")
+    // 社媒触达 → 私信 / 加好友（同一任务包含两种动作）；周期性任务 → 培育；单次触达任务 → 触达
+    const isReach = t.category === "social-reach";
+    const action = isReach
+      ? (i % 2 === 0 ? "私信" : "加好友")
       : t.subtype === "nurture" ? "培育" : "触达";
     const reachPool = REACH_TARGETS[platform] ?? [];
-    const target = t.category === "social-reach" && reachPool.length
-      ? reachPool[(h >> 6) % reachPool.length]
-      : TARGETS[(h >> 6) % TARGETS.length];
+    let target: string;
+    if (isReach && reachPool.length) {
+      // 每个子任务分配不同目标账号：按序轮转，超出池长度时追加序号后缀
+      const seq = Math.floor(i / 2); // 同一动作内的序号
+      const idx = (seq + (action === "私信" ? 0 : Math.floor(reachPool.length / 2))) % reachPool.length;
+      const dup = Math.floor(seq / reachPool.length);
+      target = dup === 0 ? reachPool[idx] : `${reachPool[idx]} (${dup + 1})`;
+    } else {
+      target = TARGETS[(h >> 6) % TARGETS.length];
+    }
+
     const base = USERNAMES[i % USERNAMES.length];
     const round = Math.floor(i / USERNAMES.length);
     const reachAccount = round === 0 ? base : `${base}-${round + 1}`;
