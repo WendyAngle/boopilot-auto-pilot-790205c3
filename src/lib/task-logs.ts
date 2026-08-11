@@ -215,7 +215,7 @@ export function buildLogs(t: TaskRow): LogRow[] {
     }
     for (let k = before; k < rows.length; k++) rows[k].subIndex = i;
   }
-  rows.push(...buildPostLogs(t));
+  if (!isReach) rows.push(...buildPostLogs(t));
   rows.sort((a, b) => a.ts.localeCompare(b.ts));
   return rows;
 }
