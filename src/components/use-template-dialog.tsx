@@ -375,7 +375,7 @@ export function UseTemplateDialog({ template, task, open, onOpenChange, onViewDe
           name: task.name,
           platforms: [...task.platforms],
           perAccount: Math.max(1, Math.round(task.total / Math.max(1, task.platforms.length || 1))),
-          ...saved,
+          ...(saved as Partial<DraftState>),
           nurtureGroups: groups,
         } as DraftState);
       } else {
