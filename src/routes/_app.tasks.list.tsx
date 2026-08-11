@@ -455,10 +455,17 @@ function TaskListPage() {
       </Dialog>
 
       <UseTemplateDialog
-        task={editingTask}
-        open={!!editingTask}
+        task={editingTask && getTaskCategory(editingTask) !== "social-reach" ? editingTask : null}
+        open={!!editingTask && getTaskCategory(editingTask) !== "social-reach"}
         onOpenChange={(o) => { if (!o) setEditingTask(null); }}
       />
+
+      <ReachTaskDialog
+        task={editingTask && getTaskCategory(editingTask) === "social-reach" ? editingTask : null}
+        open={!!editingTask && getTaskCategory(editingTask) === "social-reach"}
+        onOpenChange={(o) => { if (!o) setEditingTask(null); }}
+      />
+
 
       <TaskDetailDialog task={detailTask} onClose={() => setDetailTask(null)} />
 
