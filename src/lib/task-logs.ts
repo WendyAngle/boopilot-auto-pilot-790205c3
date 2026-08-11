@@ -98,12 +98,20 @@ function mkRow(
   };
 }
 
+// 社媒触达（拓客）任务的动作池：不含 follow_user / like_post / comment_post / post_create / share_post
+export const REACH_ACTION_TYPES = [
+  "gather_friend_list", "gather_unread_message", "visit_no_target",
+  "send_message", "add_friend",
+] as const;
+
 export function buildLogs(t: TaskRow): LogRow[] {
   const rows: LogRow[] = [];
+  const isReach = t.category === "social-reach";
   const total = t.total;
   const done = t.done;
   const failed = t.failed;
   const running = t.status === "running" ? Math.min(2, total - done - failed) : 0;
+
   const baseDate = (t.createdAt.split(" ")[0] || "2026-04-22");
   const [bh, bm, bs] = (t.createdAt.split(" ")[1] || "14:12:00").split(":").map(Number);
   
@@ -134,11 +142,14 @@ export function buildLogs(t: TaskRow): LogRow[] {
     const pf = platformText(platform);
 
     // 每个账号子任务包含 2~3 个动作，覆盖整次任务的多种操作
+    // 社媒触达任务只做拓客类动作（私信/加好友/拉取列表等），不含关注、发帖、点赞、评论
+    const pool = isReach ? REACH_ACTION_TYPES : ACTION_TYPES;
     const actionCount = 2 + ((h >>> 21) % 2); // 2 或 3
     const actions: string[] = [];
     for (let a = 0; a < actionCount; a++) {
-      actions.push(ACTION_TYPES[((h >>> (3 + a * 4)) + a) % ACTION_TYPES.length]);
+      actions.push(pool[((h >>> (3 + a * 4)) + a) % pool.length]);
     }
+
 
     const sDispatch = SUCCESS_CODES.WORK_DISPATCH_SUCCEEDED;
     const sCreated = SUCCESS_CODES.ACTION_CREATED;
@@ -204,7 +215,7 @@ export function buildLogs(t: TaskRow): LogRow[] {
     }
     for (let k = before; k < rows.length; k++) rows[k].subIndex = i;
   }
-  rows.push(...buildPostLogs(t));
+  if (!isReach) rows.push(...buildPostLogs(t));
   rows.sort((a, b) => a.ts.localeCompare(b.ts));
   return rows;
 }
