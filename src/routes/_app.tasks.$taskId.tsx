@@ -116,8 +116,11 @@ function buildSubTasks(t: TaskRow): SubTask[] {
   for (let i = 0; i < total; i++) {
     const h = hash(`${t.id}|${i}`);
     const platform = t.platforms[h % t.platforms.length];
-    // 周期性任务 → 培育；单次触达任务 → 触达
-    const action = t.subtype === "nurture" ? "培育" : "触达";
+    // 社媒触达 → 加好友 / 私信；周期性任务 → 培育；单次触达任务 → 触达
+    const reachAction = (t.draft as Record<string, unknown> | undefined)?.reachAction;
+    const action = t.category === "social-reach"
+      ? (typeof reachAction === "string" ? reachAction : "私信")
+      : t.subtype === "nurture" ? "培育" : "触达";
     const target = TARGETS[(h >> 6) % TARGETS.length];
     const base = USERNAMES[i % USERNAMES.length];
     const round = Math.floor(i / USERNAMES.length);

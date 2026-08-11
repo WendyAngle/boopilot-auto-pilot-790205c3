@@ -30,6 +30,8 @@ export interface TaskRow {
   source?: "dm" | "friend-approve" | "friend-reject";
   /** 手动台账任务对应的托管账号 ID */
   sourceAccountId?: string;
+  /** 显式指定任务分类（未指定时按 source 推导，默认养号任务） */
+  category?: TaskCategory;
 }
 
 export type ExecState = "completed" | "running" | "pending" | "aborted";
@@ -110,13 +112,15 @@ export const SUBTYPE_CLS: Record<TaskSubType, string> = {
   action: "bg-amber-500/10 text-amber-600 border-amber-300/40",
 };
 
-/** 任务分类（面向用户展示的任务类型）：养号任务 / 通过好友申请 / 拒绝好友申请 / 私信 */
-export type TaskCategory = "nurture" | "friend-approve" | "friend-reject" | "dm" | "coview";
+/** 任务分类（面向用户展示的任务类型） */
+export type TaskCategory =
+  | "nurture" | "friend-approve" | "friend-reject" | "dm" | "coview" | "social-reach";
 
 export const TASK_CATEGORY_LABEL: Record<TaskCategory, string> = {
   nurture: "养号任务",
   dm: "私信任务",
   coview: "账号同屏任务",
+  "social-reach": "社媒触达",
   "friend-approve": "通过好友申请",
   "friend-reject": "拒绝好友申请",
 };
@@ -127,9 +131,11 @@ export const TASK_CATEGORY_CLS: Record<TaskCategory, string> = {
   "friend-reject": "bg-rose-500/10 text-rose-600 border-rose-300/40",
   dm: "bg-sky-500/10 text-sky-600 border-sky-300/40",
   coview: "bg-amber-500/10 text-amber-600 border-amber-300/40",
+  "social-reach": "bg-teal-500/10 text-teal-600 border-teal-300/40",
 };
 
-export function getTaskCategory(t: Pick<TaskRow, "source">): TaskCategory {
+export function getTaskCategory(t: Pick<TaskRow, "source" | "category">): TaskCategory {
+  if (t.category) return t.category;
   if (t.source === "dm") return "dm";
   if (t.source === "friend-approve") return "friend-approve";
   if (t.source === "friend-reject") return "friend-reject";
@@ -404,6 +410,86 @@ const initialTasks: TaskRow[] = [
       sessionDurationUnit: "min",
       recurDuration: 0,
       recurForever: true,
+    },
+  },
+  {
+    id: "204683410000008",
+    name: "Facebook 潜客加好友触达",
+    subtype: "action",
+    platforms: ["Facebook"],
+    total: 40, done: 34, failed: 3,
+    status: "running",
+    category: "social-reach",
+    description: "按「跨境物流」关键词筛选出的 40 个潜客账号发起加好友触达，通过后自动进入私信培育。",
+    createdBy: "李雨欣",
+    createdAt: "2026-06-01 09:20:00",
+    draft: {
+      name: "Facebook 潜客加好友触达",
+      platforms: ["Facebook"],
+      reachAction: "加好友",
+      targetMode: "keyword",
+      targetKeyword: "跨境物流、货代",
+      targetSource: "关键词搜索",
+      replies: 11,
+      reachTags: ["潜客开发", "高活跃"],
+      reachAccounts: ["acc-r01", "acc-r02", "acc-r03", "acc-r04"],
+      postTags: [],
+      postIds: [],
+      execMode: "now",
+    },
+  },
+  {
+    id: "204683410000009",
+    name: "Instagram 高意向客户私信触达",
+    subtype: "action",
+    platforms: ["Instagram"],
+    total: 25, done: 22, failed: 3,
+    status: "partial",
+    category: "social-reach",
+    description: "对名录中 25 个高意向客户账号发送首轮私信开场话术，附产品目录链接。",
+    createdBy: "陈晓明",
+    createdAt: "2026-05-30 15:05:00",
+    endTime: "2026-05-30 16:12:40",
+    draft: {
+      name: "Instagram 高意向客户私信触达",
+      platforms: ["Instagram"],
+      reachAction: "私信",
+      targetMode: "list",
+      targetSource: "客户名录",
+      replies: 7,
+      reachTags: ["高意向", "名录导入"],
+      reachAccounts: ["acc-r11", "acc-r12", "acc-r13"],
+      postTags: ["新品促销"],
+      postIds: ["post-901"],
+      execMode: "now",
+    },
+  },
+  {
+    id: "204683410000010",
+    name: "Tiktok 新客私信触达",
+    subtype: "action",
+    platforms: ["Tiktok"],
+    total: 30, done: 0, failed: 0,
+    status: "pending",
+    category: "social-reach",
+    description: "对近 7 天互动过的 30 个新客账号定时发送首轮私信触达，使用 AI 生成的多语言话术。",
+    createdBy: "黄雪",
+    createdAt: "2026-06-02 10:00:00",
+    draft: {
+      name: "Tiktok 新客私信触达",
+      platforms: ["Tiktok"],
+      reachAction: "私信",
+      targetMode: "keyword",
+      targetKeyword: "美妆、护肤",
+      targetSource: "互动足迹",
+      replies: 0,
+      reachTags: ["新客", "AI 话术"],
+      reachAccounts: ["acc-r21", "acc-r22", "acc-r23"],
+      postTags: [],
+      postIds: [],
+      execMode: "scheduled",
+      scheduledDate: "2026-06-03",
+      scheduledTime: "09:30",
     },
   },
 ];
