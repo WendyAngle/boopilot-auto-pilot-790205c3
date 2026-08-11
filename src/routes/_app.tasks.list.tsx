@@ -10,6 +10,8 @@ import {
   MessageCircle, UserCheck, UserX, MonitorPlay, Send, type LucideIcon,
 } from "lucide-react";
 import { UseTemplateDialog } from "@/components/use-template-dialog";
+import { ReachTaskDialog } from "@/components/reach-task-dialog";
+
 import { ensureActivityTasksSeeded, useActivitySubtasks, ACTIVITY_SOURCE_LABEL } from "@/lib/activity-tasks";
 import { PLATFORM_META } from "@/lib/managed-account-mock";
 import { User2, AtSign, ArrowRight } from "lucide-react";
@@ -455,10 +457,17 @@ function TaskListPage() {
       </Dialog>
 
       <UseTemplateDialog
-        task={editingTask}
-        open={!!editingTask}
+        task={editingTask && getTaskCategory(editingTask) !== "social-reach" ? editingTask : null}
+        open={!!editingTask && getTaskCategory(editingTask) !== "social-reach"}
         onOpenChange={(o) => { if (!o) setEditingTask(null); }}
       />
+
+      <ReachTaskDialog
+        task={editingTask && getTaskCategory(editingTask) === "social-reach" ? editingTask : null}
+        open={!!editingTask && getTaskCategory(editingTask) === "social-reach"}
+        onOpenChange={(o) => { if (!o) setEditingTask(null); }}
+      />
+
 
       <TaskDetailDialog task={detailTask} onClose={() => setDetailTask(null)} />
 
