@@ -414,7 +414,7 @@ const initialTasks: TaskRow[] = [
   },
   {
     id: "204683410000008",
-    name: "Facebook 潜客加好友触达",
+    name: "Facebook 触达",
     subtype: "action",
     platforms: ["Facebook"],
     total: 40, done: 34, failed: 3,
@@ -424,7 +424,7 @@ const initialTasks: TaskRow[] = [
     createdBy: "李雨欣",
     createdAt: "2026-06-01 09:20:00",
     draft: {
-      name: "Facebook 潜客加好友触达",
+      name: "Facebook 触达",
       platforms: ["Facebook"],
       reachAction: "加好友",
       targetMode: "keyword",
