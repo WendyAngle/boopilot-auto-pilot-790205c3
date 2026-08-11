@@ -146,7 +146,10 @@ function buildSubTasks(t: TaskRow): SubTask[] {
     const action = t.category === "social-reach"
       ? (typeof reachAction === "string" ? reachAction : "私信")
       : t.subtype === "nurture" ? "培育" : "触达";
-    const target = TARGETS[(h >> 6) % TARGETS.length];
+    const reachPool = REACH_TARGETS[platform] ?? [];
+    const target = t.category === "social-reach" && reachPool.length
+      ? reachPool[(h >> 6) % reachPool.length]
+      : TARGETS[(h >> 6) % TARGETS.length];
     const base = USERNAMES[i % USERNAMES.length];
     const round = Math.floor(i / USERNAMES.length);
     const reachAccount = round === 0 ? base : `${base}-${round + 1}`;
