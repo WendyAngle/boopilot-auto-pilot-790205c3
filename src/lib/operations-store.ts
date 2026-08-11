@@ -30,6 +30,8 @@ export interface TaskRow {
   source?: "dm" | "friend-approve" | "friend-reject";
   /** 手动台账任务对应的托管账号 ID */
   sourceAccountId?: string;
+  /** 显式指定任务分类（未指定时按 source 推导，默认养号任务） */
+  category?: TaskCategory;
 }
 
 export type ExecState = "completed" | "running" | "pending" | "aborted";
@@ -110,13 +112,15 @@ export const SUBTYPE_CLS: Record<TaskSubType, string> = {
   action: "bg-amber-500/10 text-amber-600 border-amber-300/40",
 };
 
-/** 任务分类（面向用户展示的任务类型）：养号任务 / 通过好友申请 / 拒绝好友申请 / 私信 */
-export type TaskCategory = "nurture" | "friend-approve" | "friend-reject" | "dm" | "coview";
+/** 任务分类（面向用户展示的任务类型） */
+export type TaskCategory =
+  | "nurture" | "friend-approve" | "friend-reject" | "dm" | "coview" | "social-reach";
 
 export const TASK_CATEGORY_LABEL: Record<TaskCategory, string> = {
   nurture: "养号任务",
   dm: "私信任务",
   coview: "账号同屏任务",
+  "social-reach": "社媒触达",
   "friend-approve": "通过好友申请",
   "friend-reject": "拒绝好友申请",
 };
@@ -127,9 +131,11 @@ export const TASK_CATEGORY_CLS: Record<TaskCategory, string> = {
   "friend-reject": "bg-rose-500/10 text-rose-600 border-rose-300/40",
   dm: "bg-sky-500/10 text-sky-600 border-sky-300/40",
   coview: "bg-amber-500/10 text-amber-600 border-amber-300/40",
+  "social-reach": "bg-teal-500/10 text-teal-600 border-teal-300/40",
 };
 
-export function getTaskCategory(t: Pick<TaskRow, "source">): TaskCategory {
+export function getTaskCategory(t: Pick<TaskRow, "source" | "category">): TaskCategory {
+  if (t.category) return t.category;
   if (t.source === "dm") return "dm";
   if (t.source === "friend-approve") return "friend-approve";
   if (t.source === "friend-reject") return "friend-reject";
