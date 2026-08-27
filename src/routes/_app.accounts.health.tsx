@@ -251,7 +251,6 @@ function AccountHealthPage() {
       r.platformId,
       r.platform,
       ACCOUNT_STATUS_META[r.status].label,
-      r.platformStatus,
       MARK_SOURCE_LABEL[r.markSource],
       r.statusNote,
       r.needsManual ? "是" : "否",
@@ -268,7 +267,6 @@ function AccountHealthPage() {
         "平台ID",
         "平台",
         "当前状态",
-        "平台侧状态",
         "标记来源",
         "状态说明",
         "状态记录时间",
@@ -651,7 +649,6 @@ function AccountHealthPage() {
                   {[
                     "账号（平台ID）",
                     "当前状态",
-                    "平台侧状态",
                     "标记来源",
                     "状态说明",
                     "状态记录时间",
@@ -717,9 +714,6 @@ function AccountHealthPage() {
                           </TooltipTrigger>
                           <TooltipContent className="max-w-xs">{STATUS_EXPLAIN[r.status]}</TooltipContent>
                         </Tooltip>
-                      </td>
-                      <td className="max-w-[220px] px-3 py-3 text-xs text-muted-foreground">
-                        {r.platformStatus}
                       </td>
                       <td className="px-3 py-3">
                         <Badge
@@ -802,7 +796,7 @@ function AccountHealthPage() {
                 })}
                   {pageRows.length === 0 && (
                     <tr>
-                      <td colSpan={13} className="px-3 py-10 text-center text-sm text-muted-foreground">
+                      <td colSpan={12} className="px-3 py-10 text-center text-sm text-muted-foreground">
                         暂无符合条件的账号
                       </td>
                     </tr>
