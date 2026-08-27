@@ -841,7 +841,7 @@ function ConfirmStatusDialog({
 }) {
   const [status, setStatus] = useState<AccountStatus>("normal");
   const [note, setNote] = useState("");
-  const who = getCurrentUser()?.name ?? "当前用户";
+  const who = getCurrentUser()?.displayName ?? "当前用户";
   if (!rec) return null;
   const platformStatus = PLATFORM_STATUS_MAP[status][rec.platform];
   return (
@@ -912,7 +912,7 @@ function HandleDialog({
   const [method, setMethod] = useState<HandleMethod>("发起申诉");
   const [result, setResult] = useState<HandleResult>("已恢复");
   const [note, setNote] = useState("");
-  const who = getCurrentUser()?.name ?? "当前用户";
+  const who = getCurrentUser()?.displayName ?? "当前用户";
   if (!recs) return null;
   if (recs.length === 0) {
     return (
