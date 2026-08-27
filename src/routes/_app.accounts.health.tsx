@@ -796,7 +796,7 @@ function AccountHealthPage() {
                 })}
                   {pageRows.length === 0 && (
                     <tr>
-                      <td colSpan={13} className="px-3 py-10 text-center text-sm text-muted-foreground">
+                      <td colSpan={12} className="px-3 py-10 text-center text-sm text-muted-foreground">
                         暂无符合条件的账号
                       </td>
                     </tr>
