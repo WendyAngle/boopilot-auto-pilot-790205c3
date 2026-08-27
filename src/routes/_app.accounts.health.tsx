@@ -263,23 +263,24 @@ function AccountHealthPage() {
       r.markedAt,
       r.handledAt ?? "",
     ]);
-    const header = [
-      "账号",
-      "平台ID",
-      "平台",
-      "当前状态",
-      "平台侧状态",
-      "标记来源",
-      "状态说明",
-      "需人工处理",
-      "处理状态",
-      "处理方式",
-      "处理结果",
-      "处理说明",
-      "处理人",
-      "标记时间",
-      "处理时间",
-    ];
+      const header = [
+        "账号",
+        "平台ID",
+        "平台",
+        "当前状态",
+        "平台侧状态",
+        "标记来源",
+        "状态说明",
+        "状态记录时间",
+        "需人工处理",
+        "处理状态",
+        "处理方式",
+        "处理结果",
+        "处理说明",
+        "处理人",
+        "标记时间",
+        "处理时间",
+      ];
     const csv = [header, ...rows]
       .map((r) => r.map((c) => `"${String(c).replace(/"/g, '""')}"`).join(","))
       .join("\n");
@@ -653,6 +654,7 @@ function AccountHealthPage() {
                     "平台侧状态",
                     "标记来源",
                     "状态说明",
+                    "状态记录时间",
                     "需人工处理",
                     "处理状态",
                     "处理方式",
@@ -735,6 +737,9 @@ function AccountHealthPage() {
                       <td className="max-w-[220px] px-3 py-3">
                         <span className="line-clamp-2 text-xs">{r.statusNote}</span>
                       </td>
+                      <td className="whitespace-nowrap px-3 py-3 text-xs text-muted-foreground">
+                        {r.markedAt}
+                      </td>
                       <td className="px-3 py-3">
                         {r.needsManual ? (
                           <Badge variant="outline" className="rounded-full bg-destructive/10 text-destructive border-destructive/30">
@@ -795,13 +800,13 @@ function AccountHealthPage() {
                     </tr>
                   );
                 })}
-                {pageRows.length === 0 && (
-                  <tr>
-                    <td colSpan={12} className="px-3 py-10 text-center text-sm text-muted-foreground">
-                      暂无符合条件的账号
-                    </td>
-                  </tr>
-                )}
+                  {pageRows.length === 0 && (
+                    <tr>
+                      <td colSpan={13} className="px-3 py-10 text-center text-sm text-muted-foreground">
+                        暂无符合条件的账号
+                      </td>
+                    </tr>
+                  )}
               </tbody>
             </table>
           </div>
