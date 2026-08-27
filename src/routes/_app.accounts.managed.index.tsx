@@ -542,6 +542,22 @@ function ManagedAccountsPage() {
             </Button>
             <Button
               variant="outline"
+              className="border-primary/40 text-primary hover:text-primary"
+              onClick={() => navigate({ to: "/accounts/health" })}
+            >
+              <ShieldCheck className="h-4 w-4" />
+              账号健康看板
+              {stats.disabled + stats.risk > 0 && (
+                <Badge
+                  variant="outline"
+                  className="ml-1 rounded-full border-destructive/30 bg-destructive/10 px-1.5 text-[10px] text-destructive"
+                >
+                  {stats.disabled + stats.risk}
+                </Badge>
+              )}
+            </Button>
+            <Button
+              variant="outline"
               onClick={() => setExportOpen(true)}
             >
               <Download className="h-4 w-4" />
