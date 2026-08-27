@@ -49,6 +49,7 @@ const nav: NavItem[] = [
     icon: Users,
     children: [
       { title: "账号列表", url: "/accounts/managed" },
+      { title: "账号健康看板", url: "/accounts/health" },
       { title: "私信管理", url: "/accounts/messages" },
       { title: "好友管理", url: "/accounts/friends" },
     ],
