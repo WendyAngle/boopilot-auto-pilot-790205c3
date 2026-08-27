@@ -373,9 +373,9 @@ function ManagedAccountsPage() {
           <StatCard title="账号总数" value={stats.total} icon={Users2} tone="primary" />
           <StatCard title="正常" value={stats.normal} icon={CheckCircle2} tone="success" />
           <StatCard title="待确认" value={stats.pending} icon={Clock} tone="warning" />
+          <StatCard title="功能受限" value={stats.disabled} icon={Power} tone="warning" />
           <StatCard title="风控" value={stats.risk} icon={AlertTriangle} tone="warning" />
-          <StatCard title="禁用" value={stats.disabled} icon={Power} tone="muted" />
-          <StatCard title="登录失败" value={stats.fail} icon={XCircle} tone="destructive" />
+          <StatCard title="账号被封" value={stats.fail} icon={XCircle} tone="destructive" />
         </div>
 
         {/* 筛选 */}

@@ -67,24 +67,24 @@ export const ACCOUNT_STATUS_META: Record<
   AccountStatus,
   { label: string; cls: string }
 > = {
+  pending: {
+    label: "待确认",
+    cls: "bg-warning/10 text-warning border-warning/30",
+  },
   normal: {
     label: "正常",
     cls: "bg-success/10 text-success border-success/30",
   },
-  pending: {
-    label: "待确认",
+  disabled: {
+    label: "功能受限",
     cls: "bg-warning/10 text-warning border-warning/30",
   },
   risk: {
     label: "风控",
     cls: "bg-warning/10 text-warning border-warning/30",
   },
-  disabled: {
-    label: "禁用",
-    cls: "bg-muted text-muted-foreground border-border",
-  },
   fail: {
-    label: "登录失败",
+    label: "账号被封",
     cls: "bg-destructive/10 text-destructive border-destructive/30",
   },
 };
