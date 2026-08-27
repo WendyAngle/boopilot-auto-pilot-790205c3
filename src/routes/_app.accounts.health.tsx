@@ -715,9 +715,6 @@ function AccountHealthPage() {
                           <TooltipContent className="max-w-xs">{STATUS_EXPLAIN[r.status]}</TooltipContent>
                         </Tooltip>
                       </td>
-                      <td className="max-w-[220px] px-3 py-3 text-xs text-muted-foreground">
-                        {r.platformStatus}
-                      </td>
                       <td className="px-3 py-3">
                         <Badge
                           variant="outline"
