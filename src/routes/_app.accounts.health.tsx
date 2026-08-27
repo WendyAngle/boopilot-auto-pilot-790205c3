@@ -736,6 +736,9 @@ function AccountHealthPage() {
                       <td className="max-w-[220px] px-3 py-3">
                         <span className="line-clamp-2 text-xs">{r.statusNote}</span>
                       </td>
+                      <td className="whitespace-nowrap px-3 py-3 text-xs text-muted-foreground">
+                        {r.markedAt}
+                      </td>
                       <td className="px-3 py-3">
                         {r.needsManual ? (
                           <Badge variant="outline" className="rounded-full bg-destructive/10 text-destructive border-destructive/30">
