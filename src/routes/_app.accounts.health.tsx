@@ -550,7 +550,7 @@ function AccountHealthPage() {
           </div>
 
           {/* 筛选 */}
-          <div className="grid grid-cols-1 gap-4 border-b p-4 md:grid-cols-3 xl:grid-cols-5">
+          <div className="grid grid-cols-1 gap-4 border-b p-4 md:grid-cols-3 xl:grid-cols-6">
             <FormItem label="平台">
               <Select value={platformFilter} onValueChange={(v) => { setPlatformFilter(v); setPage(1); }}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
@@ -595,6 +595,17 @@ function AccountHealthPage() {
                 </SelectContent>
               </Select>
             </FormItem>
+            <FormItem label="处理结果">
+              <Select value={resultFilter} onValueChange={(v) => { setResultFilter(v); setPage(1); }}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">全部结果</SelectItem>
+                  {HANDLE_RESULTS.map((res) => (
+                    <SelectItem key={res} value={res}>{res}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </FormItem>
             <FormItem label="账号">
               <div className="flex gap-2">
                 <div className="relative flex-1">
@@ -613,6 +624,7 @@ function AccountHealthPage() {
                     setStatusFilter("all");
                     setSourceFilter("all");
                     setManualFilter("all");
+                    setResultFilter("all");
                     setKeyword("");
                     setPage(1);
                   }}
