@@ -1,76 +1,64 @@
-# 任务状态体系重构 + 终止操作
+# 账号健康看板（账号状态监控与人工处置）
 
-## 目标
+## 一、方案概述
 
-1. 任务列表与子任务列表的"状态"列重命名为"**任务结果**"。"待执行"的数据在该列显示为 `-`。
-2. 在"任务结果"之后新增"**执行状态**"列，取值 `已完成 / 待执行 / 手动终止`。
-3. 两个列表的筛选条件同步：保留"任务结果"筛选项并新增"执行状态"筛选项。
-4. 任务列表与子任务列表：待执行 + 执行中 的数据支持「终止」操作。
-5. 子任务列表：操作列新增「终止」；表头新增「批量终止」按钮（默认置灰，选中后可点击；点击后过滤掉已完成的数据，并弹出二次确认告知用户）。
+新增页面 **账号健康看板**（路由 `/accounts/health`），作为账号状态的“监控 + 处置”一体化工作台：上半部分是统计与趋势分析，下半部分是需要人工确认/介入的具体账号台账，并支持登记处理方式与处理结果。
 
-## 字段与状态语义
+入口：账号列表页工具条新增功能按钮 **「账号健康看板」**（图标 ShieldAlert，带待处理数量红色角标，例如“账号健康看板 12”），点击跳转新页面。侧边栏「账号管理」下同步新增同名菜单，保证从任意位置可达。
 
-`TaskRow` / `SubTask` 当前的 `status` 表示运行结果（success/failed/partial/running/pending）。新增一个派生概念 **执行状态 execState**：
+> 更优方案建议：把「人工处理」做成台账 + 处置弹窗的闭环（而不是只展示），处理记录沉淀为可追溯的状态变更时间线，与现有「任务台账」的审计风格保持一致；同时在账号详情页新增「状态记录」时间线入口，两处复用同一份数据。
 
-```
-aborted → "手动终止"
-pending | running → "待执行"
-其它 (success/failed/partial) → "已完成"
-```
+## 二、页面结构
 
-任务/子任务被手动终止时：在 `TaskRow` 上新增 `aborted?: boolean` 字段（迁移到 `operations-store.ts`）；子任务由于是前端 mock 派生数据，新增页面级的 `Set<string>` 保存已被终止的子任务 ID，并在派生时把状态映射为 `aborted`。
+### 1. 状态统计卡片（顶部）
+沿用现有 `StatCard`：账号总数、待确认、正常、功能受限、风控、账号被封 +「待人工处理」（功能受限 + 风控中未处理数）。配色沿用 `ACCOUNT_STATUS_META`。
 
-| 列 | 显示规则 |
-|----|---------|
-| 任务结果 | `pending → "-"`；`aborted → "-"`（结果未产出）；其它显示原 STATUS_LABEL（执行中/成功/失败/部分成功） |
-| 执行状态 | 按 execState 映射 + 配色 Badge |
+### 2. 状态数量变化趋势（折线图，recharts）
+- 时间范围切换：近 7 天 / 近 2 周 / 近 1 个月 / 自定义（日期区间选择器，复用系统 Popover + Calendar 模式）。
+- 每个状态一条折线，图例可点击隐藏；Tooltip 显示当天各状态数量。
 
-## 实施步骤
+### 3. 各平台各状态趋势（分平台）
+- 平台切换 Tabs：Facebook / Tiktok / Instagram / Twitter-X / WhatsApp（共享上方时间范围）。
+- 图形：堆叠面积图（各状态占比随时间变化），下方附平台 × 状态的当期数量矩阵表（含环比涨跌箭头），比单纯折线更易读。
 
-### 1. `src/lib/operations-store.ts`
-- `TaskRow` 增加 `aborted?: boolean`
-- 导出 `ExecState = "completed" | "pending" | "aborted"`，`EXEC_STATE_LABEL`、`EXEC_STATE_CLS`、`getExecState(t)` 工具
-- `executeTask` 在被终止任务上不应推进；在 tick 中检查 `aborted` 标志，若为 true 则停止
-- 新增 `abortTask(id)`：将 status 置为当前 status（不动结果）、`aborted=true`，并写 `endTime`
+### 4. 账号状态台账（表格）
+列：
+| 列 | 说明 |
+|---|---|
+| 账号 | 头像 + 用户名 +（平台 ID），平台角标 |
+| 当前状态 | 状态 Badge |
+| 平台侧状态 | 参考附件映射，如 Facebook「安全锁定 (Locked/Checkpoint)」 |
+| 标记来源 | `系统标记` / `人工确认` Badge |
+| 状态说明 | 标记时的详细说明，如「功能受限-不可发帖」 |
+| 需人工处理 | 功能受限 / 风控 → 「需处理」高亮；其他 → `-` |
+| 处理状态 | 待处理 / 处理中 / 已处理 |
+| 处理方式 | 申诉 / 身份验证 / 等待期满 / 换 IP 重登 / 停用账号 / 其他 |
+| 处理结果 | 已恢复 / 仍受限 / 永久封禁 / 待观察 + 备注 |
+| 处理人 / 处理时间 | |
+| 操作 | 「人工确认状态」（待确认账号）、「登记处理」、「查看记录」 |
 
-### 2. `src/routes/_app.tasks.list.tsx`（任务列表）
-- 表头：删除"状态" → 改为"任务结果"；后面插入"执行状态"列
-- 单元格：
-  - 任务结果：`pending || aborted → "-"`，否则原 STATUS Badge
-  - 执行状态：execState Badge
-- 筛选区：
-  - 原"状态"下拉改名为"任务结果"，选项去掉 `pending`，按结果维度（执行中/成功/失败/部分成功 + "无结果"）
-  - 新增"执行状态"下拉：全部 / 已完成 / 待执行 / 手动终止
-- 行操作下拉菜单：
-  - 当 execState === "pending" 时显示「终止」并启用（pending+running 都可终止）
-  - 终止：调用 `abortTask`，toast 提示
-- 编辑按钮：仅未终止的 `pending` 可编辑（保持原意图）
+筛选：平台、当前状态、标记来源、是否需人工处理、处理状态、关键词（账号名/平台 ID）、标记时间区间。快捷筛选 Tab：全部 / 待人工确认 / 待处理 / 处理中 / 已处理。分页复用 `PaginationBar`。
 
-### 3. `src/routes/_app.tasks.$taskId.tsx`（子任务列表）
-- `SubStatus` 增加 `"aborted"`；标签/配色补齐
-- 页面 state：`const [abortedSubs, setAbortedSubs] = useState<Set<string>>(new Set())`；在 `buildSubTasks` 之后做一次映射，将其中的子任务 status 置为 `aborted`
-- 表头：原"任务状态" → "任务结果"；新增"执行状态"列；首列新增 Checkbox（全选 = 当前页所有 pending/running 子任务）
-- 行操作列：
-  - 「查看日志」保留
-  - 新增「终止」（仅 pending/running 可点）
-- 筛选区：「状态」改为「任务结果」+ 新增「执行状态」下拉
-- 顶部工具条（在筛选条上方新增一行）：
-  - 「批量终止」按钮：未选中时 disabled
-  - 点击 → 过滤掉已完成（success/failed/partial/aborted）的 id → 弹 `AlertDialog` 二次确认：
-    > 已自动过滤 X 条已完成/已终止数据，确认对剩余 Y 条「待执行/执行中」的子任务执行终止吗？
-  - 确认后：合并入 `abortedSubs`，清空选择，toast 提示
+批量：批量标记人工已处理（弹窗中统一填处理方式 + 结果 + 备注，二次确认）。
 
-### 4. UI 细节
-- 复用现有 `STATUS_CLS` 配色风格新增 `EXEC_STATE_CLS`：
-  - completed → success 色
-  - pending → muted/primary 色
-  - aborted → destructive 弱化色（`bg-destructive/10 text-destructive border-destructive/30`）
-- 二次确认使用项目里现成的 `@/components/ui/alert-dialog`
-- Checkbox 使用 `@/components/ui/checkbox`，列宽 36px，与表格其它列对齐
+### 5. 处置弹窗
+- **人工确认状态**：选择与平台一致的真实状态（按平台给出附件中的候选项）、填写状态说明、确认人自动带出。
+- **登记处理**：处理方式（下拉，按平台+状态给出附件中的推荐恢复方式并标注触发条件/不可操作项提示）、处理结果、处理说明、处理时间；提交后写入时间线并更新处理状态。
+- **查看记录**：右侧抽屉展示该账号状态变更 + 处置时间线。
 
-## 验收
+## 三、技术实现
 
-- 任务列表"任务结果"列对 pending 显示 `-`；"执行状态"列正确
-- 任务列表筛选"执行状态=手动终止"能过滤出已终止任务
-- 任务列表对 pending/running 行点「终止」后：execState 显示「手动终止」、任务结果显示 `-`
-- 子任务列表勾选混合数据点「批量终止」→ 弹窗显示自动过滤数量；确认后只对待执行/执行中生效
+- 新增 `src/lib/account-health-mock.ts`：
+  - `PLATFORM_STATUS_MAP`：附件表 1（运营平台状态 ↔ 各平台状态文案）与表 2（触发条件、不可操作、申诉/恢复方式）的结构化数据。
+  - `AccountHealthRecord`：`accountId, markSource, platformStatus, statusNote, needsManual, handleState, handleMethod, handleResult, handleNote, handler, markedAt, handledAt, timeline[]`。
+  - 基于 `seedManagedAccounts()` 派生 mock 记录（保证与账号列表数据一致），并提供 `buildStatusTrend(range)`、`buildPlatformTrend(range)` 生成趋势序列（确定性伪随机，末日数据与当前真实统计对齐）。
+  - 轻量 store（`useSyncExternalStore`，同 `systemTags.ts` 模式）支持前端登记处理后即时刷新。
+- 新增路由 `src/routes/_app.accounts.health.tsx`（含 `head()` 元数据），图表用已安装的 recharts，全部颜色走语义 token。
+- 修改 `src/routes/_app.accounts.managed.index.tsx` 增加入口按钮；`src/components/app-sidebar.tsx` 增加菜单项。
+
+## 四、需要你确认的点
+
+1. 入口按钮名称用「账号健康看板」是否合适？（备选：账号状态监控 / 账号风控中心）
+2. 趋势数据默认时间范围用「近 7 天」可以吗？
+3. 处理方式/处理结果的候选项是否就按附件表 2 的“申诉/恢复方式”归纳为：等待期满、发起申诉、身份验证、换设备/IP 重登、更换官方 App、停用账号、其他？
+4. 台账是否需要「导出」功能（复用账号列表的导出弹窗风格）？
