@@ -190,6 +190,7 @@ function AccountHealthPage() {
   const [statusFilter, setStatusFilter] = useState("all");
   const [sourceFilter, setSourceFilter] = useState("all");
   const [manualFilter, setManualFilter] = useState("all");
+  const [resultFilter, setResultFilter] = useState("all");
   const [keyword, setKeyword] = useState("");
   const [page, setPage] = useState(1);
   const [selected, setSelected] = useState<string[]>([]);
@@ -209,6 +210,7 @@ function AccountHealthPage() {
         if (sourceFilter !== "all" && r.markSource !== sourceFilter) return false;
         if (manualFilter === "yes" && !r.needsManual) return false;
         if (manualFilter === "no" && r.needsManual) return false;
+        if (resultFilter !== "all" && r.handleResult !== resultFilter) return false;
         const k = keyword.trim().toLowerCase();
         if (
           k &&
@@ -217,7 +219,7 @@ function AccountHealthPage() {
           return false;
         return true;
       }),
-    [scoped, tab, platformFilter, statusFilter, sourceFilter, manualFilter, keyword],
+    [scoped, tab, platformFilter, statusFilter, sourceFilter, manualFilter, resultFilter, keyword],
   );
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
