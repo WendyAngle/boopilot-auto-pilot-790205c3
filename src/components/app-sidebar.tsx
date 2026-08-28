@@ -69,6 +69,7 @@ const nav: NavItem[] = [
     children: [
       { title: "任务模版", url: "/tasks/templates" },
       { title: "任务列表", url: "/tasks/list" },
+      { title: "任务诊断", url: "/tasks/diagnostics" },
     ],
   },
 
