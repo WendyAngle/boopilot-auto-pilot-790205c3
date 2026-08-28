@@ -251,10 +251,11 @@ function buildSubTasks(): SubTaskRec[] {
   for (let i = 0; i < TOTAL; i++) {
     const s = `st${i}`;
     const category = pick(DIAG_CATEGORIES, `c${s}`);
-    // Facebook 占比更高，符合实测数据
-    const platform: Platform =
-      h(`p${s}`) < 0.5 ? "Facebook" : pick(PLATFORMS, `p2${s}`);
     const taskIdx = int(`ti${s}`, 1, 26);
+    // 同一父任务下所有子任务共享平台（Facebook 占比更高，符合实测数据）
+    const taskSeed = `${category}#${taskIdx}`;
+    const platform: Platform =
+      h(`p${taskSeed}`) < 0.5 ? "Facebook" : pick(PLATFORMS, `p2${taskSeed}`);
     const names = TASK_NAME_BY_CATEGORY[category];
     const taskName = `${platform} ${names[taskIdx % names.length]} #${String(taskIdx).padStart(2, "0")}`;
     // 近 30 天，越近越密
