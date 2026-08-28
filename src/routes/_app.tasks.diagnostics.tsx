@@ -601,13 +601,13 @@ function TaskDiagnosticsPage() {
 
         {/* 趋势 + 原因聚类 */}
         <div className="grid gap-4 xl:grid-cols-2">
-          <Card className="p-5 shadow-[var(--shadow-card)]">
+          <Card className="flex flex-col p-5 shadow-[var(--shadow-card)]">
             <SectionHead
               icon={Activity}
               title="失败趋势"
               sub={`失败子任务数 vs 失败率（${filter.range === "24h" ? "按小时" : filter.range === "7d" ? "按天" : "按周"}）`}
             />
-            <div className="h-64 w-full">
+            <div className="min-h-64 w-full flex-1">
               <ResponsiveContainer width="100%" height="100%">
                 <ComposedChart data={trend} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
                   <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} />
