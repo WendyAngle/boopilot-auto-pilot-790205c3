@@ -206,11 +206,12 @@ export const MACHINE_POOL = Array.from({ length: 9 }, (_, i) => {
   };
 });
 
+/** 任务名基础词（不含平台，运行时按实际平台拼接，避免"TikTok 养号"落在 Facebook 上） */
 const TASK_NAME_BY_CATEGORY: Record<TaskCategory, string[]> = {
-  nurture: ["Facebook 日常养号", "Instagram 养号计划", "TikTok 冷启动养号"],
+  nurture: ["日常养号", "养号计划", "冷启动养号"],
   dm: ["新客私信触达", "老客召回私信"],
   coview: ["账号同屏巡检", "同屏批量互动"],
-  "social-reach": ["Q3 新品社媒触达", "达人加好友触达"],
+  "social-reach": ["新品社媒触达", "达人社媒触达"],
   "friend-approve": ["好友申请自动通过"],
   "friend-reject": ["好友申请自动拒绝"],
 };
