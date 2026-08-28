@@ -256,7 +256,7 @@ function buildSubTasks(): SubTaskRec[] {
       h(`p${s}`) < 0.5 ? "Facebook" : pick(PLATFORMS, `p2${s}`);
     const taskIdx = int(`ti${s}`, 1, 26);
     const names = TASK_NAME_BY_CATEGORY[category];
-    const taskName = `${names[taskIdx % names.length]} #${String(taskIdx).padStart(2, "0")}`;
+    const taskName = `${platform} ${names[taskIdx % names.length]} #${String(taskIdx).padStart(2, "0")}`;
     // 近 30 天，越近越密
     const ts = NOW - Math.floor(Math.pow(h(`t${s}`), 1.4) * 30 * DAY);
     const rnd = h(`r${s}`);
